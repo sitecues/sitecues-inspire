@@ -1,0 +1,27 @@
+<html>
+<head>
+<link rel='stylesheet' type='text/css' href='css/inspire.css'>
+<script type='text/javascript' src='l18n/inspire_strings.php?lang={{lang}}&f=js'></script>
+<script type='text/javascript' src='js/inspire.js'></script>
+<script type='text/javascript'>
+var lang = '{{lang}}';
+</script>
+</head>
+<body>
+<div id='main'>
+	<div id='col_left'>
+		<div id='header'>
+			<div id='logo'><img src='img/logo.png' onclick='document.location.href="/private/aaron/inspire"'></div>
+			<div id='searchbox'>
+				<input type='search' id='search' aria-label='Search Accounts' placeholder='Search Accounts'>
+				<input type='image' id='add' src='img/add.png' aria-label='Add Project' title='Add Project' onClick='newProject();'>
+			</div>
+		</div>
+		<iframe id='accounts' src='html/accounts.html' onload='parent.window.postMessage({"msg":"loaded","id":this.id}, "*");'></iframe>
+	</div>	
+	<div id='col_right'>
+		<iframe id='account' src='account.php' onload='parent.window.postMessage({"msg":"loaded","id":this.id}, "*");'></iframe>
+	</div>
+</div>
+</body>
+</html>

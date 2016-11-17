@@ -1,0 +1,25 @@
+<div id="dlgForm">
+	<div>
+		<fieldset>
+			<legend>Attachment Details</legend>
+			<div class="col">
+				<div class="row">
+					<label for="filename">File:</label>
+					<input type="text" id="filename" class="tabable" readonly="true">
+					<button onclick="document.getElementById('afile').click();" aria-label="Browse" tabindex="0" class="tabable">Browse...</button>
+					<form id="aform" action="inspire.php?action=newAttachment" method="post" enctype="multipart/form-data" onsubmit="return false;">
+						<input type="file" name="afile" id="afile" style="display: none;" onchange="document.getElementById('filename').value=this.value;">
+					</form>
+				</div>
+				<div class="row">
+					<label for="desc">Description:</label>
+					<textarea id="desc" class="tabable"></textarea>
+				</div>
+		</fieldset>
+	</div>
+	<div id="dlgButtons">
+		<button id="btnAdd" class="tabable" onclick="upload(document.getElementById('aform'), document.getElementById('desc').value);">Add</button>
+		&nbsp;
+		<button onclick="closeDlg();" id="btnCancel" class="tabable">Cancel</button>
+	</div>
+</div>

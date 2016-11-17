@@ -1,0 +1,66 @@
+<html>
+<head>
+<link rel='stylesheet' type='text/css' href='css/inspire.css'>
+<link rel='stylesheet' type='text/css' href='css/project.css'>
+<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+<script type='text/javascript'>
+
+// Load the Visualization API and the piechart package.
+google.load('visualization', '1.0', {'packages':['corechart']});
+
+// Set a callback to run when the Google Visualization API is loaded.
+google.setOnLoadCallback(drawChart);
+
+// Callback that creates and populates a data table,
+// instantiates the pie chart, passes in the data and
+// draws it.
+function drawChart() {
+	var stagesOptions = {
+		title: 'Stages',
+		titlePosition: 'out',
+		axisTitlesPosition: 'out',
+		fontName: '"Open Sans","Helvetica Neue",helvetica,Arial,sans-serif',
+		orientation: 'horizontal',
+		dataOpacity: .5,
+		forceIFrame: false
+	};
+	
+	var statusOptions = {
+		title: 'Status',
+		titlePosition: 'out',
+		axisTitlesPosition: 'out',
+		fontName: '"Open Sans","Helvetica Neue",helvetica,Arial,sans-serif',
+		orientation: 'horizontal',
+		dataOpacity: .5,
+		forceIFrame: false
+	};
+
+	// Stages
+	var data = new google.visualization.DataTable();
+	data.addColumn('string', 'Name');
+	data.addColumn('number', 'Count');
+
+	{{stageCounts}}
+
+	var chart = new google.visualization.BarChart(document.getElementById('stages'));
+	chart.draw(data, stagesOptions);
+	
+	// Status
+	var data = new google.visualization.DataTable();
+	data.addColumn('string', 'Name');
+	data.addColumn('number', 'Count');
+
+	{{statusCounts}}
+	
+	var chart = new google.visualization.ColumnChart(document.getElementById('status'));
+	chart.draw(data, statusOptions);
+}
+</script>
+</head>
+<body>
+<nav id='tabnav'>
+</nav>
+<div id='stages'></div>
+<div id='status'></div>
+</body>
+</html>

@@ -1,0 +1,251 @@
+html, body {
+	font-family: "Open Sans","Helvetica Neue",helvetica,Arial,sans-serif;
+	font-size: 12pt;
+	height: 100%;
+	height: 100%;
+	margin: 0px;
+	border: 0px;	
+	background: #ffffff;
+}
+
+/*-------------------------------*/
+/* Nav bar
+/*-------------------------------*/
+
+#tabnav {
+	background: #1C4E9C;
+	border-bottom: 2px #000000 solid;
+	flex: 0 0 auto;
+	height: 44px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;	
+	align-content: center;
+	justify-content: center;
+}
+
+#tabnav .tab {
+	flex: 0 1 33%;
+	color: #ffffff;
+	line-height: 30px;
+	text-align: center;
+	background: #6C8BBB;
+	border: 1px #000000 solid;
+    border-radius: 10px;
+	margin: 30px;
+	text-decoration: none;
+}
+
+#tabnav h1 {
+	display: inline;
+}
+
+#tabnav > .tab:hover {
+	background: #8AA6D0;
+}
+
+/*-------------------------------*/
+/* Content
+/*-------------------------------*/
+
+#ppages {
+	flex: 1 1 1;
+	display: flex;
+	overflow: auto;
+}
+
+/*-------------------------------*/
+/* Project page
+/*-------------------------------*/
+
+#ppage_project {
+	flex: 1 1 auto;
+	display: none;
+	flex-direction: row;
+	justify-content: center;
+	align-items: flex-start;
+	align-content: center;
+	overflow: auto;
+}
+
+#ppage_project .column {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	align-self: stretch;
+	align-items: stretch;
+	margin: 8px;
+}
+
+#ppage_project .column .row .column .row {
+	margin-bottom: 10px;
+}
+
+#ppage_project #notesRow {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	/* align-items: stretch; */
+}
+
+#ppage_project #notesRow textarea {
+	flex: 1 1 300px;
+    width: 100%;
+}
+
+#ppage_project .noattachments {
+	padding: 20px;
+	color: #939393;
+	font-style: italic;
+}
+
+#ppage_project #noattachments {
+	padding: 20px;
+	color: #939393;
+	font-style: italic;
+}
+
+#ppage_project #noissues {
+	padding: 20px;
+	color: #939393;
+	font-style: italic;
+}
+
+#ppage_project #validation_container {
+	padding: 20px;
+}
+
+#ppage_project table {
+	width: 100%;
+	border: 1px #C5C5C5 solid;
+	border-radius: 10px;
+	background: #ffffff;
+}
+
+/*-------------------------------*/
+/* Projects page
+/*-------------------------------*/
+
+#ppage_projects {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: flex-start;
+	align-content: center;
+	overflow: auto;
+}
+
+#ppage_projects .column {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	align-self: stretch;
+	align-items: stretch;
+	margin: 8px;
+}
+
+#ppage_projects table {
+	width: 100%;
+	border: 1px #C5C5C5 solid;
+	border-radius: 10px;
+}
+
+#ppage_projects table th {
+	border-bottom: 1px #C5C5C5 solid;
+}
+
+#ppage_projects .nosites {
+	padding-left: 60px;
+	color: #939393;
+	font-style: italic;
+}
+
+#ppage_projects #siteButtons {
+	margin: 10px;
+}
+
+#ppage_projects .nosites {
+	padding-left: 60px;
+	color: #939393;
+	font-style: italic;
+}
+
+/*-------------------------------*/
+/* Notes page
+/*-------------------------------*/
+
+#ppage_notes {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: flex-start;
+	align-content: center;
+	display: none;
+	overflow: auto;
+}
+
+#ppage_notes .column {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	align-self: stretch;
+	align-items: stretch;
+	margin: 8px;
+}
+
+/*-------------------------------*/
+/* History page
+/*-------------------------------*/
+
+#ppage_history {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: flex-start;
+	align-content: center;
+	display: none;
+	overflow: auto;
+}
+
+#ppage_history .column {
+	flex: 1 1 auto;
+	display: flex;
+	flex-direction: column;
+	align-self: stretch;
+	align-items: stretch;
+	margin: 8px;
+}
+
+.rtfContainer {
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	align-content: stretch;
+}
+
+.rtfContainer fieldset {
+	flex: 1 1 auto;
+	align-self: stretch;
+	display: flex;
+}
+
+.rtfContainer textarea {
+	flex: 1 1 auto;
+	align-self: stretch;
+}
+
+.green {
+	color: #11A60D;
+}
+
+.red {
+	color: #A80000;
+	background-image: url('../img/warning.png');
+	background-position: center right;
+	background-repeat: no-repeat;
+}
