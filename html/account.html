@@ -135,22 +135,30 @@ var account = JSON.parse('{{account}}');
 	</div>
 	<!------------------------------------- notes page ------------------------------------>
 	<div id='ppage_notes' class='ppage'>
-		<div class='rtfContainer'>
-			<fieldset>
-				<legend>Project Notes</legend>
-				<textarea id='notes'>{{notes}}</textarea>
-				<script>loadTiny('notes');</script>
-			</fieldset>
+		<div class='column'>
+			<div class='row'>
+				<div class='rtfContainer'>
+					<fieldset>
+						<legend>Project Notes</legend>
+						<textarea id='notes'>{{notes}}</textarea>
+						<script>loadTiny('notes');</script>
+					</fieldset>
+				</div>
+			</div>
 		</div>
 	</div>
 	<!------------------------------------- History page ------------------------------------>
 	<div id='ppage_history' class='ppage'>
-		<div class='rtfContainer'>
-			<fieldset>
-				<legend>Project History</legend>
-				<textarea id='history'>{{history}}</textarea>
-				<script>loadTiny('history');</script>
-			</fieldset>
+		<div class='column'>
+			<div class='row'>
+				<div class='rtfContainer'>
+					<fieldset>
+						<legend>Project History</legend>
+						<textarea id='history'>{{history}}</textarea>
+						<script>loadTiny('history');</script>
+					</fieldset>
+				</div>
+			</div>
 		</div>
 	</div>
 </div>

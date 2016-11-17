@@ -2,7 +2,6 @@ html, body {
 	font-family: "Open Sans","Helvetica Neue",helvetica,Arial,sans-serif;
 	font-size: 12pt;
 	height: 100%;
-	height: 100%;
 	margin: 0px;
 	border: 0px;	
 	background: #ffffff;
@@ -49,77 +48,10 @@ html, body {
 /*-------------------------------*/
 
 #ppages {
-	flex: 1 1 1;
+	flex: 1 0 100%;
 	display: flex;
 	overflow: auto;
-}
-
-/*-------------------------------*/
-/* Project page
-/*-------------------------------*/
-
-#ppage_project {
-	flex: 1 1 auto;
-	display: none;
-	flex-direction: row;
-	justify-content: center;
-	align-items: flex-start;
-	align-content: center;
-	overflow: auto;
-}
-
-#ppage_project .column {
-	flex: 1 1 auto;
-	display: flex;
-	flex-direction: column;
-	align-self: stretch;
-	align-items: stretch;
-	margin: 8px;
-}
-
-#ppage_project .column .row .column .row {
-	margin-bottom: 10px;
-}
-
-#ppage_project #notesRow {
-	flex: 1;
-	display: flex;
-	flex-direction: column;
-	/* align-items: stretch; */
-}
-
-#ppage_project #notesRow textarea {
-	flex: 1 1 300px;
-    width: 100%;
-}
-
-#ppage_project .noattachments {
-	padding: 20px;
-	color: #939393;
-	font-style: italic;
-}
-
-#ppage_project #noattachments {
-	padding: 20px;
-	color: #939393;
-	font-style: italic;
-}
-
-#ppage_project #noissues {
-	padding: 20px;
-	color: #939393;
-	font-style: italic;
-}
-
-#ppage_project #validation_container {
-	padding: 20px;
-}
-
-#ppage_project table {
-	width: 100%;
-	border: 1px #C5C5C5 solid;
-	border-radius: 10px;
-	background: #ffffff;
+	height: 100%;
 }
 
 /*-------------------------------*/
@@ -172,27 +104,90 @@ html, body {
 }
 
 /*-------------------------------*/
-/* Notes page
+/* Project page
 /*-------------------------------*/
 
-#ppage_notes {
+#ppage_project {
 	flex: 1 1 auto;
-	display: flex;
+	display: none;
 	flex-direction: row;
 	justify-content: center;
 	align-items: flex-start;
 	align-content: center;
-	display: none;
 	overflow: auto;
 }
 
-#ppage_notes .column {
+#ppage_project .column {
 	flex: 1 1 auto;
 	display: flex;
 	flex-direction: column;
 	align-self: stretch;
 	align-items: stretch;
 	margin: 8px;
+}
+
+#ppage_project .column .row .column .row {
+	margin-bottom: 10px;
+}
+
+#ppage_project #noattachments {
+	padding: 20px;
+	color: #939393;
+	font-style: italic;
+}
+
+#ppage_project #noissues {
+	padding: 20px;
+	color: #939393;
+	font-style: italic;
+}
+
+#ppage_project #validation_container {
+	padding: 20px;
+}
+
+#ppage_project table {
+	width: 100%;
+	border: 1px #C5C5C5 solid;
+	border-radius: 10px;
+	background: #ffffff;
+}
+
+/*-------------------------------*/
+/* Notes page
+/*-------------------------------*/
+
+#ppage_notes {
+	flex: 1 0 auto;
+	display: none;
+	flex-direction: row;
+	justify-content:flex-start;
+	align-items: stretch;
+	align-content: stretch;
+	overflow: auto;
+	display: none;
+}
+
+#ppage_notes .column {
+	flex: 1 0 auto;
+	display: flex;
+	flex-direction: column;
+	align-self: stretch;
+	align-items: stretch;
+	margin: 8px;
+	height: 600px;
+}
+
+#ppage_notes .row {
+	flex: 1 0 auto;
+}
+
+#ppage_notes iframe {
+	width: 100%;
+	height: 100%;
+	flex: 1 0 auto;
+	align-self: stretch;
+	align-items: stretch;
 }
 
 /*-------------------------------*/
@@ -200,43 +195,32 @@ html, body {
 /*-------------------------------*/
 
 #ppage_history {
-	flex: 1 1 auto;
-	display: flex;
-	flex-direction: row;
-	justify-content: center;
-	align-items: flex-start;
-	align-content: center;
+	flex: 1 0 auto;
+	align-self: stretch;
 	display: none;
 	overflow: auto;
+	height: 100%;
+	display: none;
+	flex-direction: row;
 }
 
 #ppage_history .column {
-	flex: 1 1 auto;
-	display: flex;
-	flex-direction: column;
-	align-self: stretch;
-	align-items: stretch;
 	margin: 8px;
+	flex: 1 0 auto;
+	align-self: stretch;
+	display: flex;
 }
 
 .rtfContainer {
-	width: 100%;
-	height: 100%;
+	flex: 1 0 auto;
+	align-self: stretch;
 	display: flex;
-	flex-direction: row;
-	align-items: flex-start;
-	align-content: stretch;
 }
 
 .rtfContainer fieldset {
-	flex: 1 1 auto;
+	flex: 1 0 auto;
 	align-self: stretch;
-	display: flex;
-}
-
-.rtfContainer textarea {
-	flex: 1 1 auto;
-	align-self: stretch;
+	height: 800px;
 }
 
 .green {
@@ -244,8 +228,10 @@ html, body {
 }
 
 .red {
-	color: #A80000;
-	background-image: url('../img/warning.png');
-	background-position: center right;
-	background-repeat: no-repeat;
+    background-image: url("../img/warning.png");
+    background-position: right -1px;
+    background-repeat: no-repeat;
+    background-size: 20px 20px;
+    line-height: 24px;
+    padding-right: 22px;
 }
