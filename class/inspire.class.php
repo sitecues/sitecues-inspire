@@ -23,32 +23,12 @@ class inspire {
 			$lang = 'en'; // Because we'd better always have English strings.
 		}
 		$html = strtr(file_get_contents('html\main.html'), array(
+			'{{login}}' => $login->user->email,
 			'{{lang}}' => $lang
 		));
 		echo $html;
 	}
 	
-	// public function getAccountContent($get) {
-		// $account = $this->getAccount($get);
-		// $sites_table = $this->buildSitesTable($account->urls);
-		// $issues_table = $this->buildIssuesTable($account->urls);
-		// $html = strtr(file_get_contents('html\account.html'), array(
-			// '{{proj}}' => json_encode($account),
-			// '{{account_id}}' => $account->id,
-			// '{{account_name}}'	=> $account->name,
-			// '{{account_description}}' => $account->description,
-			// // '{{s_name}}' => $project->s_name,
-			// // '{{s_email}}' => $project->s_email,
-			// // '{{t_name}}' => $project->t_name,
-			// // '{{t_email}}' => $project->t_email,
-			// // '{{a_email}}' => $project->a_email,
-			// // '{{sites_table}}'	=> $sites_table,
-			// // '{{issues_table}}'	=> $issues_table,
-			// // '{{proj}}'	=> json_encode($project)
-		// ));
-		// echo $html;
-	//}
-
 	public static function connect() {
 		$pdo = mypdo::connect2('sitecuesadmin', 'M&2Qa}FAbApX_/,&', 'mysql:host=64.90.60.123;port=3306;dbname=sitecues');		
 		$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -92,45 +72,42 @@ class inspire {
 
 	public function addAccount($get) {
 		$success = 0;
-		$p_name = $this->general_tools->sanitize($get['p_name']);
-		$s_name = $this->general_tools->sanitize($get['s_name']);
-		$s_email = $this->general_tools->sanitize($get['s_email']);
-		$t_name = $this->general_tools->sanitize($get['t_name']);
-		$t_email = $this->general_tools->sanitize($get['t_email']);
-		$a_email = $this->general_tools->sanitize($get['a_email']);
-		$qs = "insert into sitecues.accounts (name, s_name, s_email, t_name, t_email, a_email) values (:name, :s_name, :s_email, :t_name, :t_email, :a_email)";
+		$name = $this->general_tools->sanitize($get['name']);
+		$description = $this->general_tools->sanitize($get['description']);
+		$tier = $this->general_tools->sanitize($get['tier']);
+		$sales_id = $this->general_tools->sanitize($get['sales_id']);
+		$qs = "insert into sitecues.accounts (name, description, tier, sales_id, updated) values (:name, :description, :tier, :sales_id, NOW())";
 		try {
 			$q = $this->pdo->prepare($qs);
 			$q->execute(array(
-				':name'	=> $p_name,
-				':s_name' => $s_name,
-				':s_email' => $s_email,
-				':t_name' => $t_name,
-				':t_email' => $t_email,
-				':a_email' => $a_email,
+				':name'	=> $name,
+				':description' => $description,
+				':tier' => $tier,
+				':sales_id' => $sales_id
 			));
 			$success = $q->rowCount();
 		} catch (PDOException $e) {
 			$success = $e;
 		}
-		return array('success' => $success, 'name' => $p_name);
+		return array('success' => $success, 'name' => $name);
 	}
 	
-	public function addSite($get) {
-		$pid = $this->general_tools->sanitize($get['pid']);
-		$url = $this->general_tools->sanitize($get['url']);
-		$siteid = $this->general_tools->sanitize($get['siteid']);
-		$created = date("Y-m-d", strtotime($this->general_tools->sanitize($get['created'])));
-		$status = $this->general_tools->sanitize($get['status']);
-		$qs = "insert into sitecues.projects (pid, url, siteid, created, status) values (:pid, :url, :siteid, :created, :status)";
+	public function addProject($get) {
+		$qs = "insert into sitecues.projects (pid, url, siteid, created, status, stage, s_name, s_email, t_name, t_email, sales_id) values (:pid, :url, :siteid, :created, :status, :stage, :s_name, :s_email, :t_name, :t_email, :sales_id)";
 		try {
 			$q = $this->pdo->prepare($qs);
 			$q->execute(array(
-				':pid'	=> $pid,
-				':url' => $url,
-				':siteid' => $siteid,
-				':created'	=> $created,
-				':status'	=> $status,
+				':pid'	=> $this->general_tools->sanitize($get['pid']),
+				':url' => $this->general_tools->sanitize($get['url']),
+				':siteid' => $this->general_tools->sanitize($get['siteid']),
+				':created'	=> date("Y-m-d", strtotime($this->general_tools->sanitize($get['created']))),
+				':status'	=> $this->general_tools->sanitize($get['status']),
+				':stage'	=> $this->general_tools->sanitize($get['stage']),
+				':s_name'	=> $this->general_tools->sanitize($get['s_name']),
+				':s_email'	=> $this->general_tools->sanitize($get['s_email']),
+				':t_name'	=> $this->general_tools->sanitize($get['t_name']),
+				':t_email'	=> $this->general_tools->sanitize($get['t_email']),
+				':sales_id'	=> $this->general_tools->sanitize($get['sales_id']),
 			));
 			$success = $q->rowCount();
 		} catch (PDOException $e) {
@@ -313,6 +290,15 @@ class inspire {
 		header("Content-Length: {$a->size}");
 		header("Content-Disposition: $disposition; filename=\"$filename\"");
 		echo $a->data;
+	}
+	
+	public static function getStatusText($status) {
+		$qs = "select name from sitecues.status where id=:id";
+		$q = inspire::connect()->prepare($qs);
+		$q->execute(array(
+			':id'	=> $status
+		));
+		return $q->fetch()[0];
 	}
 }
 ?>

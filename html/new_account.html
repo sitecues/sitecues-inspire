@@ -1,48 +1,26 @@
 <div id="dlgForm">
 	<div>
 		<fieldset>
-			<legend>Project</legend>
+			<legend>Account</legend>
 				<div class="col">
 					<div class="row">
-						<label for="a_p_name">Name:</label>
-						<input type="text" id="a_p_name" class="tabable">
+						<label for="n_name">Name:</label>
+						<input type="text" id="n_name" class="tabable">
 					</div>
 					<div class="row">
-						<label for="a_p_desc">Description:</label>
-						<textarea id="a_p_desc" class="tabable"></textarea>
+						<label for="n_description">Description:</label>
+						<textarea id="n_description" class="tabable"></textarea>
 					</div>
 				</div>
 		</fieldset>
 	</div>
 	<div>
 		<fieldset>
-			<legend>Sales Contact</legend>
+			<legend>Tier</legend>
 			<div class="col">
 				<div class="row">
-					<label for="a_s_name">Name:</label>
-					<input type="text" id="a_s_name" class="tabable">
-				</div>
-				<div class="row">
-					<label for="a_s_email">Email:</label>
-					<input type="text" id="a_s_email" class="tabable">
-				</div>
-			</div>
-		</fieldset>
-	</div>
-	<div>
-		<fieldset>
-			<legend>Technical Contact 
-				<input type="checkbox" onclick="copySalesContact();">
-				<span style="font-size: .8em; color: #939393;">Same as Sales Contact</span>
-			</legend>
-			<div class="col">
-				<div class="row">
-					<label for="a_t_name">Name:</label>
-					<input type="text" id="a_t_name" class="tabable">
-				</div>
-				<div class="row">
-					<label for="a_t_email">Email:</label>
-					<input type="text" id="a_t_email" class="tabable">
+					<label for="n_tier">Tier:</label>
+					<select id="n_tier" class="tabable"></select>
 				</div>
 			</div>
 		</fieldset>
@@ -52,15 +30,15 @@
 			<legend>Sitecues Contact</legend>
 			<div class="col">
 				<div class="row" id="contact_container">
-					<label for="a_a_email">Name:</label>
-					<select id="a_a_email" class="tabable"></select>
+					<label for="n_sales_id">Name:</label>
+					<select id="n_sales_id" class="tabable"></select>
 				</div>
 			</div>
 		</fieldset>
 	</div>
 </div>
 <div id="dlgButtons">
-<button id="btnAdd" class="tabable" disabled onclick="addProject();">Add</button>
+<button id="btnAdd" class="tabable" disabled onclick="addAccount();">Add</button>
 &nbsp;
 <button onclick="closeDlg();" id="btnCancel" class="tabable">Cancel</button>
 </div>

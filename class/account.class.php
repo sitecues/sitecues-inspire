@@ -51,7 +51,7 @@ class account {
 			<thead>
 				<tr>
 					<th>
-						<input src='../img/add.png' aria-label='Add Site' title='Add Site' onclick='newSite();' type='image' role='button'>
+						<input src='../img/add.png' aria-label='Add Project' title='Add Project' onclick='newProject();' type='image' role='button'>
 					</th>
 					<th>Url</th>
 					<th>Site ID</th>
@@ -86,7 +86,7 @@ class account {
 				<td style='width: 25%;' align='center'><a href='#{$project->url->realurl}' onclick='loadProject({$project->id});'>{$project->url->url}</a></td>
 				<td style='width: 25%;' align='center'><span class='$valid'>{$project->siteid}</span></td>
 				<td style='width: 25%;' align='center'>{$project->created}</td>
-				<td style='width: 25%;' align='center'>statusText</td>
+				<td style='width: 25%;' align='center'>{$project->statusText}</td>
 				<td align='center'>
 					<img src='../img/$img.png' aria-label='{$checked['txt']}' title='{$checked['txt']}'>
 				</td>

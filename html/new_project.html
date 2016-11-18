@@ -1,0 +1,75 @@
+<div id="dlgForm">
+	<div class='row'>
+		<div class='column'>
+			<fieldset>
+				<legend>Project Details</legend>
+				<div class='column'>
+					<div class='row'>
+						<label for='url'>URL:</label>
+						<input type='text' id='url' class='tabable'>
+					</div>
+					<div class='row'>
+						<label for='site_id'>Site ID:</label>
+						<input type='text' id='site_id' class='tabable'>
+					</div>
+					<div class='row'>
+						<label for='created'>Created:</label>
+						<input type='text' id='created' class='tabable'>
+					</div>
+					<div class='row'>
+						<label for='stage'>Stage:</label>
+						<select id='stage'><option>Loading...</option></select>
+					</div>
+					<div class='row'>
+						<label for='status'>Status:</label>
+						<select id='status'><option>Loading...</option></select>
+					</div>
+				</div>
+			</fieldset>
+		</div>
+		<div class='column'>
+			<fieldset>
+				<legend>Sales Contact</legend>
+				<div class='column'>
+					<div class='row'>
+						<label for='s_name'>Name:</label> 
+						<input type='text' id='s_name' class='tabable' value=''>
+					</div>
+					<div class='row'>
+						<label for='s_email'>Email:</label> 
+						<input type='text' id='s_email' class='tabable' value=''>
+					</div>
+				</div>
+			</fieldset>
+			<fieldset>
+				<legend>Technical Contact</legend>
+				<div class='column'>
+					<div class='row'>
+						<label for='t_name'>Name:</label> 
+						<input type='text' id='t_name' class='tabable' value=''>
+					</div>
+					<div class='row'>
+						<label for='t_email'>Email:</label> 
+						<input type='text' id='t_email' class='tabable' value=''>
+					</div>
+				</div>
+			</fieldset>
+			<fieldset>
+				<legend>Sitecues Contact</legend>
+				<div class='column'>
+					<div class='row'>
+						<label for='sales_id'>Name:</label> 
+						<select id='sales_id' class='tabable'>
+							<option>Loading...</option>
+						</select>
+					</div>
+				</div>
+			</fieldset>
+		</div>
+	</div>
+	<div id="dlgButtons">
+		<button id="btnAdd" class="tabable">Add</button>
+		&nbsp;
+		<button onclick="closeDlg();" id="btnCancel" class="tabable">Cancel</button>
+	</div>
+</div>

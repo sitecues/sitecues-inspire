@@ -49,7 +49,6 @@ bindEvent(window, "message", function(e) {
 });
 
 function main() {
-	frames.initialized = true;
 	// Store our iframes for easy reference
 	var accounts = document.getElementById("accounts");
 	frames.el.accounts = accounts;
@@ -61,13 +60,15 @@ function main() {
 	frames.win.account = account.contentWindow;
 	frames.dom.account = account.contentDocument || account.contentWindow.document;
 
+	frames.initialized = true;
+	
 	// Load the accounts
 	frames.win.accounts.loadAccounts(null);
 	enableSearchEvents();
 
 	// Pre-load templates and static data
 	getRequest("inspire.php?action=newAccountSrc", "newAccountSrc");
-	getRequest("inspire.php?action=newSiteSrc", "newSiteSrc");
+	getRequest("inspire.php?action=newProjectSrc", "newProjectSrc");
 	getRequest("inspire.php?action=newAttachmentSrc", "newAttachmentSrc");
 	getRequest("inspire.php?action=confirmSrc", "confirmSrc");
 	getRequest("inspire.php?action=getStages", "getStages");
@@ -167,12 +168,12 @@ function httpResult(http, id) {
 					if (resultObj.success == 1) {
 						closeDlg();
 						frames.win.accounts.loadAccounts(null, null);
-						frames.win.accounts.loadAccount(resultObj.name);
+						frames.win.account.loadAccount(resultObj.name);
 					} else {
 						alert("oops: " + resultObj.success);
 					}
 					break;
-				case "addSite":
+				case "addProject":
 					if (resultObj.success == 1) {
 						closeDlg();
 						frames.win.account.refreshSites();
@@ -202,7 +203,7 @@ function httpResult(http, id) {
 				case "getStages":
 				case "getStatus":
 				case "newAccountSrc":
-				case "newSiteSrc":
+				case "newProjectSrc":
 				case "newAttachmentSrc":
 				case "confirmSrc":
 				case "getUrlStatus":
@@ -230,6 +231,7 @@ function httpResult(http, id) {
 }
 
 function loading(enabled, e) {
+	console.log("> > > loading: " + enabled + ", " + e);
 	if (enabled) {
 		var w = e.offsetWidth;
 		var h = e.offsetHeight;
@@ -359,30 +361,19 @@ function dlg(title, content, e = document.activeElement) {
 			enableAddBtn(dialog);
 			break;
 		}
-		case strings.IDS_NEW_SITE:
+		case strings.IDS_NEW_PROJECT:
 			var addBtn = dialog.querySelector("#btnAdd");
 			addBtn.innerHTML = strings.IDS_ADD;
 			bindEvent(addBtn, "click", function() {
-				frames.win.account.addSite(dialog)
+				frames.win.account.addProject(dialog)
 			});
-			populateStatus(dialog);
+			populateStatus(document.getElementById("status"));
+			populateSitecuesContacts(document.getElementById("sales_id"));
+			populateStages(document.getElementById("stage"));
 			break;
-		case strings.IDS_NEW_PROJECT:
-			var e;
-			if (e = document.getElementById("a_a_email")) {
-				while (e.options.length) {
-					e.remove(0);
-				}
-				var r;
-				var contacts = getcache("getSitecuesContacts");
-				for (var i = 0; i < contacts.length; i++) {
-					var contact = contacts[i];
-					var opt = document.createElement("option");
-					opt.value = contact.email;
-					opt.text = contact.name;
-					e.appendChild(opt);
-				}
-			}
+		case strings.IDS_NEW_ACCOUNT:
+			populateServiceTiers(document.getElementById("n_tier"));
+			populateSitecuesContacts(document.getElementById("n_sales_id"));
 			break;
 		case strings.IDS_NEW_ATTACHMENT:
 			break;
@@ -459,16 +450,14 @@ function copySalesContact() {
 }
 
 function newAccount() {
-	dlg(strings.IDS_NEW_PROJECT, getcache("newAccountSrc").html);
+	dlg(strings.IDS_NEW_ACCOUNT, getcache("newAccountSrc").html);
 }
 
 function addAccount() {
-	getRequest("inspire.php?action=addAccount&p_name=" + document.getElementById("a_p_name").value
-		+ "&s_name=" + document.getElementById("a_s_name").value 
-		+ "&s_email=" + document.getElementById("a_s_email").value 
-		+ "&t_name=" + document.getElementById("a_t_name").value 
-		+ "&t_email=" + document.getElementById("a_t_email").value 
-		+ "&a_email=" + document.getElementById("a_a_email").value, "addAccount");
+	getRequest("inspire.php?action=addAccount&name=" + document.getElementById("n_name").value + 
+	"&description=" + document.getElementById("n_description").value +
+	"&tier=" + document.getElementById("n_tier").value +
+	"&sales_id=" + document.getElementById("n_sales_id").value, "addAccount");
 }
 
 function setcache(id, obj) {
@@ -489,12 +478,9 @@ function strtolower (str) {
     return (str+'').toLowerCase();
 }
 
-function populateStatus(dlg) {
-	var e;
-	if (e = document.getElementById("status")) {
-		while (e.options.length) {
-			e.remove(0);
-		}
+function populateStatus(e) {
+	if (e) {
+		clearOptions(e);
 		var currentStatus = document.getElementById("currentStatus");
 		var statusi = getcache("getUrlStatus");
 		for (var i = 0; i < statusi.length; i++) {
@@ -502,7 +488,7 @@ function populateStatus(dlg) {
 			var opt = document.createElement("option");
 			opt.value = status.id;
 			opt.text = status.name;
-			opt.selected = (currentStatus && currentStatus.value == status.id);
+			//opt.selected = (currentStatus && currentStatus.value == status.id);
 			e.appendChild(opt);
 		}
 	}
@@ -527,4 +513,56 @@ function upload(f, d) {
 	fd.append("description", d);
 	fd.append("pid", frames.win.account.proj.id);
 	postRequest("inspire.php?action=newAttachment", fd, "upload");
+}
+
+function populateServiceTiers(e) {
+	if (e) {
+		clearOptions(e);
+		var tiers = getcache("getServiceTiers");
+		for (var i = 0; i < tiers.length; i++) {
+			var tier = tiers[i];
+			var opt = document.createElement("option");
+			opt.value = tier.id;
+			opt.text = tier.name;
+			e.appendChild(opt);
+		}
+	}
+}
+
+function populateStages(e) {
+	if (e) {
+		clearOptions(e);
+		var tiers = getcache("getStages");
+		for (var i = 0; i < tiers.length; i++) {
+			var tier = tiers[i];
+			var opt = document.createElement("option");
+			opt.value = tier.id;
+			opt.text = tier.name;
+			e.appendChild(opt);
+		}
+	}
+}
+
+function populateSitecuesContacts(e) {
+	if (e) {
+		clearOptions(e)
+		var contacts = getcache("getSitecuesContacts");
+		for (var i = 0; i < contacts.length; i++) {
+			var contact = contacts[i];
+			var opt = document.createElement("option");
+			opt.value = contact.email;
+			opt.text = contact.name;
+			// If the email matches the gloabl login email var, select it.
+			opt.selected = (opt.value == login);
+			e.appendChild(opt);
+		}
+	}
+}
+
+function clearOptions(e) {
+	if (e) {
+		while (e.options.length) {
+			e.remove(0);
+		}
+	}
 }

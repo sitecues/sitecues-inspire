@@ -17,8 +17,8 @@ if (isset($_GET['action'])) {
 		case 'addAccount':
 			$response = $inspire->addAccount($_GET);
 			break;
-		case 'addSite':
-			$response = $inspire->addSite($_GET);
+		case 'addProject':
+			$response = $inspire->addProject($_GET);
 			break;
 		case 'updateSite':
 			$response = $inspire->updateSite($_GET);
@@ -41,8 +41,8 @@ if (isset($_GET['action'])) {
 		case 'newAccountSrc':
 			$response = array('html' => file_get_contents('html\new_account.html'));
 			break;
-		case 'newSiteSrc':
-			$html = preg_replace('/{{date}}/', date('m/d/Y', time()), file_get_contents('html\new_site.html'));
+		case 'newProjectSrc':
+			$html = preg_replace('/{{date}}/', date('m/d/Y', time()), file_get_contents('html\new_project.html'));
 			$response = array('html' => $html);
 			break;
 		case 'newAttachmentSrc':

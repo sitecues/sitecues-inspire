@@ -59,7 +59,6 @@ function getAccount(id) {
 				win.document.write(atob(msg.value));
 				win.document.close();			
 				parent.loading(false, parent.frames.el.account);
-				//selectAccount(account.name);
 				break;
 			default:
 				var str = eval("parent.strings.IDS_PROGRESS_" + msg.msg);
@@ -71,17 +70,4 @@ function getAccount(id) {
 
 function refreshAccounts() {
 	loadAccounts(null);
-}
-
-function selectAccount(name) {
-	var accounts = document.getElementById("accountlist").getElementsByTagName("a");
-	var currname = parent.frames.win.account.proj.name;
-	for (var i = 0; i < accounts.length; i++) {
-		var account = accounts[i];
-		var name = account.innerHTML;
-		account.className = (name == currname) ? "account_selected" : "account";
-		if (account.className == "account_selected") {
-			//account.scrollIntoView();
-		}
-	}
 }

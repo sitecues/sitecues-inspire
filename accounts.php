@@ -1,6 +1,7 @@
 <?php
 require_once('class/inspire.class.php');
 require_once('class/account.class.php');
+require_once('class/event.class.php');
 
 if (count($_GET) == 0) {
 	// $pdo = inspire::connect();
@@ -57,15 +58,15 @@ if (count($_GET) == 0) {
 	ob_start();
 	$showProgress = isset($_GET['progress']) ? $_GET['progress'] : 0;
 	$inspire = new inspire();
-	accountHandler::fireEvent(1, null, $showProgress);
+	eventHandler::fireEvent(1, null, $showProgress);
 	$account = $inspire->getAccount($_GET);
-	accountHandler::fireEvent(2, null, $showProgress);
+	eventHandler::fireEvent(2, null, $showProgress);
 	$sites_table = $inspire->buildSitesTable($account->urls);
-	accountHandler::fireEvent(3, null, $showProgress);
+	eventHandler::fireEvent(3, null, $showProgress);
 	$issues_table = $inspire->buildIssuesTable($account->urls);
-	accountHandler::fireEvent(8, null, $showProgress);
+	eventHandler::fireEvent(8, null, $showProgress);
 	$attachments_table = $inspire->buildAttachmentsTable($account->attachments);
-	accountHandler::fireEvent(4, null, $showProgress);
+	eventHandler::fireEvent(4, null, $showProgress);
 	$html = strtr(file_get_contents('html\account.html'), array(
 		'{{site_count}}' => $account->urlCount,
 		// '{{issue_count}}' => $account->issueCount,
@@ -84,6 +85,6 @@ if (count($_GET) == 0) {
 		'{{notes}}' => base64_decode($account->notes),
 		'{{history}}' => base64_decode($account->history)
 	));
-	accountHandler::fireEvent(0, $html, $showProgress);
+	eventHandler::fireEvent(0, $html, $showProgress);
 }
 ?>

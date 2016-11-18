@@ -13,12 +13,13 @@ class project {
 	public $siteid;
 	public $created;
 	public $status;
+	public $statusText;
 	public $stage;
 	public $s_name;
 	public $s_email;
 	public $t_name;
 	public $t_email;
-	public $a_email;
+	public $sales_id;
 	public $progress;
 	public $tables;
 	
@@ -49,12 +50,13 @@ class project {
 		$this->siteid = $p->siteid;
 		$this->created = $p->created;
 		$this->status = $p->status;
+		$this->statusText = inspire::getStatusText($this->status);
 		$this->stage = $p->stage;
 		$this->s_name = $p->s_name;
 		$this->s_email = $p->s_email;
 		$this->t_name = $p->t_name;
 		$this->t_email = $p->t_email;
-		$this->a_email = $p->a_email;
+		$this->sales_id = $p->sales_id;
 		$this->buildIssuesTable();
 		$this->buildAttachmentsTable();
 	}

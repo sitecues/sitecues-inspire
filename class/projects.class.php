@@ -3,14 +3,7 @@ require_once('general_tools.class.php');
 require_once('inspire.class.php');
 require_once('url.class.php');
 require_once('attachment.class.php');
-
-class accountHandler {
-	public static function fireEvent($msg, $val, $showProgress = 0) {
-		if ($showProgress) {
-			inspire::fireEvent($msg, $val);
-		}
-	}
-}
+require_once('event.class.php');
 
 class account {
 	public $id;
@@ -42,12 +35,12 @@ class account {
 		$this->pdo = inspire::connect();
 		$this->name = $name; //$this->general_tools->sanitize($name);
 		if (strlen($this->name) > 0) {
-			accountHandler::fireEvent(5, null, $showProgress);
+			eventHandler::fireEvent(5, null, $showProgress);
 			$this->getAccount();
-			accountHandler::fireEvent(6, null, $showProgress);
+			eventHandler::fireEvent(6, null, $showProgress);
 			$this->getUrls($showProgress);
 			$this->urlCount = $this->getUrlCount();
-			accountHandler::fireEvent(7, null, $showProgress);
+			eventHandler::fireEvent(7, null, $showProgress);
 			$this->issueCount = $this->getIssueCount();
 			$this->getAttachments();
 		} else {

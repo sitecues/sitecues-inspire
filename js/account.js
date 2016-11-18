@@ -3,14 +3,20 @@
 var autoSaveTimer = 0;
 
 parent.bindEvent(window, "load", function() {
-	parent.loading(false, parent.frames.el.project);
+	parent.loading(false, parent.frames.el.account);
+	selectAccount(parent.frames.win.account.account.name);
+	setLocation();
 });
 
 function setLocation() {
+	console.log("> > > setLocation");
+	console.log("\tlooking for " + account.name);
 	if (decodeURIComponent(parent.window.location.href).search(account.name) == -1) {
 		var loc = parent.window.location;
 		parent.window.history.replaceState({}, parent.document.title, loc.protocol + '//' + loc.host + loc.pathname + '?' + account.name);
 		parent.document.title = "Sitecues INSPIRE: " + account.name;
+		console.log("\t\tparent.window.history: " + parent.window.history);
+		console.log("\t\tparent.document.title: " + parent.document.title);
 	}	
 }
 
@@ -80,7 +86,7 @@ function loadProject(id) {
 	getAttachments(proj);
 	getValidation(proj)
 	getIssues(proj);
-	setLocation();	
+	setLocation();
 	enableInputEvents();
 	showTab("project");
 }
@@ -241,24 +247,26 @@ function getSite(id) {
 	return result;
 }
 
-function newSite() {
-	parent.dlg(parent.strings.IDS_NEW_SITE, parent.getcache("newSiteSrc").html);
+function newProject() {
+	parent.dlg(parent.strings.IDS_NEW_PROJECT, parent.getcache("newProjectSrc").html);
 }
 
 function newAttachment() {
 	parent.dlg(parent.strings.IDS_NEW_ATTACHMENT, parent.getcache("newAttachmentSrc").html);
 }
 
-function addSite(dialog) {
-	var url = dialog.querySelector("#url").value;
-	var siteid = dialog.querySelector("#siteid").value;
-	var created = dialog.querySelector("#created").value;
-	var status = dialog.querySelector("#status").value;
-	parent.getRequest("inspire.php?action=addSite&pid=" + proj.id
-		+ "&url=" + url 
-		+ "&siteid=" + siteid
-		+ "&created=" + created
-		+ "&status=" + status, "addSite");
+function addProject(dialog) {
+	parent.getRequest("inspire.php?action=addProject&pid=" + account.id
+		+ "&url=" + dialog.querySelector("#url").value
+		+ "&siteid=" + dialog.querySelector("#site_id").value
+		+ "&created=" + dialog.querySelector("#created").value
+		+ "&stage=" + dialog.querySelector("#stage").value
+		+ "&status=" + dialog.querySelector("#status").value
+		+ "&s_name=" + dialog.querySelector("#s_name").value
+		+ "&s_email=" + dialog.querySelector("#s_email").value
+		+ "&t_name=" + dialog.querySelector("#t_name").value
+		+ "&t_email=" + dialog.querySelector("#t_email").value
+		+ "&sales_id=" + dialog.querySelector("#sales_id").value, "addProject");
 }
 
 function editSite(id) {
@@ -302,18 +310,18 @@ function updateSite(id, url, siteid, created, status) {
 function refreshSites() {
 	var sitetable = document.getElementById("sitetable");
 	sitetable.parentNode.removeChild(sitetable);
-	parent.loading(true, parent.frames.el.project, "ppage_sites");
-	parent.getRequest("inspire.php?" + proj.name + "&action=getSitesTable", "updateSitesTable");
+	parent.loading(true, parent.frames.el.account);
+	parent.getRequest("inspire.php?" + account.name + "&action=getSitesTable", "updateSitesTable");
 }
 
 function updateSiteTable(resultObj) {
-	document.getElementById("sites_container").innerHTML = resultObj.html;
-	parent.loading(false, parent.frames.el.project, "ppage_sites");	
+	document.getElementById("projects_container").innerHTML = resultObj.html;
+	parent.loading(false, parent.frames.el.account);	
 }
 
 function updateAttachmentsTable(resultObj) {
 	// document.getElementById("sites_container").innerHTML = resultObj.html;
-	// parent.loading(false, parent.frames.el.project, "ppage_sites");	
+	// parent.loading(false, parent.frames.el.account, "ppage_sites");	
 }
 
 function loadTiny(id) {
@@ -357,4 +365,17 @@ function loadTiny(id) {
 			})
 		}
 	});
+}
+
+function selectAccount(currname) {
+	var accounts = parent.frames.dom.accounts.getElementById("accountlist").getElementsByTagName("a");
+	for (var i = 0; i < accounts.length; i++) {
+		var account = accounts[i];
+		var name = account.innerHTML;
+		account.className = (name == currname) ? "account_selected" : "account";
+		if (account.className == "account_selected") {
+			//account.scrollIntoView();
+			parent.frames.win.account.setLocation();
+		}
+	}
 }
