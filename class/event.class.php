@@ -15,6 +15,10 @@ class eventHandler {
 		$value = base64_encode($value);
 		$msg = "data: {\"msg\":\"$msg\", \"value\":\"$value\"}\n";
 		$msg .= "\n\n";	
+		if (!headers_sent()) {
+			header('Content-Type: text/event-stream');
+			header('Cache-Control: no-cache');
+		}
 		echo $msg;
 		if (ob_get_contents()) {
 			ob_end_flush();

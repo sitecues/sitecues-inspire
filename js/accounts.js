@@ -2,7 +2,7 @@
 var progressEvent = null;
 
 parent.bindEvent(window, "message", function(e) {
-	switch (e.data) {		
+	switch (e.data) {	
 		case "loadAccounts":
 			loadAccounts(null, null);
 			break;
@@ -11,21 +11,28 @@ parent.bindEvent(window, "message", function(e) {
 	}
 });
 
+function clearAccounts() {
+  var accountlist = document.getElementById("accountlist");
+  while (accountlist.firstChild) {
+    accountlist.removeChild(accountlist.firstChild);
+  }
+}
+
 function loadAccounts(search, resultObj) {
-	var accountlist = document.getElementById("accountlist");
 	if (!resultObj) {
 		parent.loading(true, parent.frames.el.accounts);
 		parent.getRequest("inspire.php?action=getAccounts" + ((search) ? "&search=" + search : ""), "getAccounts");
 	} else {
 		parent.loading(false, parent.frames.el.accounts);
 		// Clear any existing accounts
-		while (accountlist.firstChild) {
-			accountlist.removeChild(accountlist.firstChild);
-		}
+    clearAccounts();
 		if (resultObj.length) {
 			for (var i = 0; i < resultObj.length; i++) {
 				var p = resultObj[i];
 				insertAccount(p.name, p.id);
+				if (decodeURIComponent(parent.window.location.href).search(p.name) != -1) {
+					getAccount(p.id);
+				}
 			}
 		} else {
 			insertAccount(strings.IDS_NO_MATCH, "-1");

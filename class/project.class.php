@@ -12,6 +12,7 @@ class project {
 	public $url;
 	public $siteid;
 	public $created;
+	public $updated;
 	public $status;
 	public $statusText;
 	public $stage;
@@ -19,14 +20,16 @@ class project {
 	public $s_email;
 	public $t_name;
 	public $t_email;
-	public $sales_id;
 	public $progress;
 	public $tables;
+	public $description;
 	
 	private $general_tools;
 	private $pdo;
+	private $showProgress;
 	
-	function __construct() {
+	function __construct($showProgress) {
+		$this->showProgress = $showProgress;
 		$this->general_tools = new general_tools();
 		$this->pdo = inspire::connect();
 		$this->tables = array();
@@ -46,17 +49,18 @@ class project {
 	}
 	
 	private function parseProject($p) {
-		$this->url = (new url())->getUrl($p->url);
 		$this->siteid = $p->siteid;
-		$this->created = $p->created;
+		$this->url = (new url($this->showProgress))->getUrl($p->url, $this->siteid);
+		$this->created = date("m/d/Y", strtotime($p->created));
+		$this->updated = date("m/d/Y", strtotime($p->updated));
 		$this->status = $p->status;
 		$this->statusText = inspire::getStatusText($this->status);
 		$this->stage = $p->stage;
-		$this->s_name = $p->s_name;
+		$this->s_name = urlencode(htmlspecialchars_decode($p->s_name,  ENT_QUOTES | ENT_HTML401)); // So names like O'Leary will print correctly, instead of O&#x37Leary.
 		$this->s_email = $p->s_email;
-		$this->t_name = $p->t_name;
+		$this->t_name = urlencode(htmlspecialchars_decode($p->t_name,  ENT_QUOTES | ENT_HTML401));
 		$this->t_email = $p->t_email;
-		$this->sales_id = $p->sales_id;
+		$this->description = $p->description;
 		$this->buildIssuesTable();
 		$this->buildAttachmentsTable();
 	}
@@ -141,6 +145,7 @@ class project {
 					<th>Description</th>
 					<th>Size</th>
 					<th>Date</th>
+					<th></th>
 				</tr>
 			</thead>
 			<tbody>";
@@ -158,6 +163,7 @@ class project {
 					<td style='width: 20%;' align='center'>{$attachment->description}</td>
 					<td style='width: 5%;' align='center'>{$attachment->size}</td>
 					<td style='width: 5%;' align='center'>" . date("m/d/Y", strtotime($attachment->added)) . "</td>
+					<td style='width: 1%;' align='center'><img src='../img/close.png' aria-label='Delete {$attachment->name}' title='Delete {$attachment->name}' onClick='deleteAttachment({$attachment->id}, {$attachment->pid});'></td>
 				</tr>";
 			}
 		}

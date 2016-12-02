@@ -10,94 +10,150 @@ var account = JSON.parse('{{account}}');
 </head>
 <body>
 <nav id='tabnav'>
-	<a class='tab' href='#' onclick='showTab(this.id); return false;' id='tab_projects'>{{projects_count}} Projects</a>
+	<a class='tab' href='#' onclick='showTab(this.id); return false;' id='tab_account'>Account</a>
 	<a class='tab' href='#' onclick='showTab(this.id); return false;' id='tab_notes'> Notes</a>
 	<a class='tab' href='#' onclick='showTab(this.id); return false;' id='tab_history'>History</a>
 </nav>
 <div id='ppages'>
-	<!------------------------------------- projects page ------------------------------------>
-	<div id='ppage_projects' class='ppage'>
-		<div class='column' id='projects_container'>
-			{{projects_table}}
-		</div>
-	</div>
-	<!------------------------------------- project page ------------------------------------>
-	<div id='ppage_project' class='ppage'>
-		<div class='column' id='project_container'>
-			<script type='text/javascript'>
-			var proj = null;
-			</script>
+	<!------------------------------------- account page ------------------------------------>
+	<div id='ppage_account' class='ppage'>
+		<div class='column'>
 			<div class='row'>
 				<div class='column'>
 					<fieldset>
-						<legend>Project</legend>
+						<legend>Account Details <a href='#sf' onclick='window.open("https://na4.salesforce.com/_ui/search/ui/UnifiedSearchResults?str=" + document.getElementById("name").value, "_blank");'><img src='../img/salesforce.png' aria-label='Salesforce' title='Salesforce' align='right' style='padding-left: 4px;'></a></legend>
 						<div class='column'>
 							<div class='row'>
 								<label for='name'>Name:</label>
 								<input type='text' id='name' class='tabable'>
 							</div>
 							<div class='row'>
-								<label for='url'>URL:</label>
-								<input type='text' id='url' class='tabable'>
-							</div>
-							<div class='row'>
 								<label for='description'>Description:</label>
 								<textarea id='description'></textarea>
 							</div>
 							<div class='row'>
-								<label for='tier'>Service Tier:</label>
+								<label for='tier'>Tier:</label>
 								<select id='tier'><option>. . .</option></select>
 							</div>
 							<div class='row'>
-								<label for='stage'>Stage:</label>
-								<select id='stage'><option>. . .</option></select>
+								<label for='sales_id'>Contact:</label>
+								<select id='sales_id'><option>. . .</option></select>
 							</div>
 							<div class='row'>
-								<label for='status'>Status:</label>
-								<select id='status'><option>. . .</option></select>
+								<label for='created'>Created:</label>
+								<input type='text' id='created' class='tabable'>
+							</div>
+							<div class='row'>
+								<label for='updated'>Updated:</label>
+								<input type='text' id='updated' class='tabable' readonly='true'>
+							</div>
+						</div>
+					</fieldset>
+				</div>
+			</div>
+			<div class='row'>
+				<div class='column'>
+					<fieldset>
+						<legend>{{projects_count}} Projects</legend>
+						<div id='projects_container'>
+							{{projects_table}}
+						</div>
+						<br>
+						<div>
+							<button onclick='newProject();'>Add Project</button>
+						</div>
+					</fieldset>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!------------------------------------- project page ------------------------------------>
+	<div id='ppage_project' class='ppage'>
+		<input type='hidden' id='pid' value=''>
+		<div class='column' id='project_container'>
+			<div class='row'>
+				<div class='column'>
+					<fieldset>
+						<legend>Project</legend>
+						<div class='column'>
+							<div class='row'>
+								<label for='p_url'>URL:</label>
+								<input type='text' id='p_url' class='tabable'>
+							</div>
+							<div class='row'>
+								<label for='p_siteid'>Site ID:</label>
+								<input type='text' id='p_siteid' class='tabable'>
+							</div>
+							<div class='row'>
+								<label for='p_description'>Description:</label>
+								<textarea id='p_description'></textarea>
+							</div>
+							<div class='row'>
+								<label for='p_created'>Created:</label>
+								<input type='text' id='p_created' class='tabable'>
+							</div>
+							<div class='row'>
+								<label for='p_updated'>Updated:</label>
+								<input type='text' id='p_updated' class='tabable' readonly='true'>
+							</div>
+							<div class='row'>
+								<label for='p_stage'>Stage:</label>
+								<select id='p_stage'><option>. . .</option></select>
+							</div>
+							<div class='row'>
+								<label for='p_status'>Status:</label>
+								<select id='p_status'><option>. . .</option></select>
 							</div>
 						</div>
 					</fieldset>
 				</div>
 				<div class='column'>
 					<fieldset>
-						<legend>Sales Contact <a href='mailto:{{s_email}}'><img src='../img/email.png' aria-label='{{s_name}} {{s_email}}'></a></legend>
+						<legend>Sales Contact <span id='s_link'></span></legend>
 						<div class='column'>
 							<div class='row'>
-								<label for='s_name'>Name:</label> 
-								<input type='text' id='s_name' class='tabable' value='{{s_name}}'>
+								<label for='p_s_name'>Name:</label> 
+								<input type='text' id='p_s_name' class='tabable' value=''>
 							</div>
 							<div class='row'>
-								<label for='s_email'>Email:</label> 
-								<input type='text' id='s_email' class='tabable' value='{{s_email}}'>
+								<label for='p_s_email'>Email:</label> 
+								<input type='text' id='p_s_email' class='tabable' value=''>
 							</div>
 						</div>
 					</fieldset>
 					<fieldset>
-						<legend>Technical Contact <a href='mailto:{{t_email}}'><img src='../img/email.png' aria-label='{{t_name}} {{t_email}}'></a></legend>
+						<legend>Technical Contact <span id='t_link'></span></legend>
 						<div class='column'>
 							<div class='row'>
-								<label for='t_name'>Name:</label> 
-								<input type='text' id='t_name' class='tabable' value='{{t_name}}'>
+								<label for='p_t_name'>Name:</label> 
+								<input type='text' id='p_t_name' class='tabable' value=''>
 							</div>
 							<div class='row'>
-								<label for='t_email'>Email:</label> 
-								<input type='text' id='t_email' class='tabable' value='{{t_email}}'>
+								<label for='p_t_email'>Email:</label> 
+								<input type='text' id='p_t_email' class='tabable' value=''>
 							</div>
 						</div>
 					</fieldset>
-					<fieldset>
-						<legend>Sitecues Contact</legend>
-						<div class='column'>
-							<div class='row'>
-								<label for='a_email'>Name:</label> 
-								<select id='a_email' class='tabable'>
-									<option>Loading...</option>
-								</select>
-							</div>
-						</div>
-					</fieldset>
+					<!-- <fieldset> -->
+						<!-- <legend>Sitecues Contact</legend> -->
+						<!-- <div class='column'> -->
+							<!-- <div class='row'> -->
+								<!-- <label for='sales_id'>Name:</label>  -->
+								<!-- <select id='sales_id' class='tabable'> -->
+									<!-- <option>Loading...</option> -->
+								<!-- </select> -->
+							<!-- </div> -->
+						<!-- </div> -->
+					<!-- </fieldset> -->
 				</div>
+			</div>
+			<div class='row'>
+				<div class='column'>
+					<fieldset>
+						<legend>Validation</legend>
+						<div id='validation_container'></div>
+					</fieldset>
+				</div>			
 			</div>
 			<div class='row'>
 				<div class='column'>
@@ -116,19 +172,12 @@ var account = JSON.parse('{{account}}');
 			<div class='row'>
 				<div class='column'>
 					<fieldset>
-						<legend>Validation</legend>
-						<div id='validation_container'></div>
-					</fieldset>
-				</div>			
-			</div>
-			<div class='row'>
-				<div class='column'>
-					<fieldset>
 						<legend>Issues</legend>
 						<div id='issues_container'>
 							{{issues_table}}
 						</div>
 					</fieldset>
+					<div style='position: relative; height: 50px;'><!-- padding --></div>
 				</div>			
 			</div>
 		</div>

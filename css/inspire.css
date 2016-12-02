@@ -149,7 +149,7 @@ a {
 }
 
 fieldset {
-	border: 1px #dddddd solid;
+	border: 1px #C5C5C5 solid;
 	border-radius: 10px;
 	background: #efefef;
 }
@@ -166,6 +166,7 @@ fieldset legend {
 .row {
 	display: flex;
 	flex-direction: row;
+	margin-bottom: 8px;
 }
 
 .row label {
@@ -178,14 +179,14 @@ fieldset legend {
 }
 
 input[type=text], input[type=password], select, textarea {
-	border: 1px #dddddd solid;
+	border: 1px #C5C5C5 solid;
 	border-radius: 4px;
 	font: 12pt "Open Sans","Helvetica Neue",helvetica,Arial,sans-serif;
 	padding: 8px;
 }
 
 button {
-	border: 1px #DDDDDD solid;
+	border: 1px #C5C5C5 solid;
 	border-radius: 4px;
 	flex: 0 0 100px;
 	background: #efefef;
@@ -325,7 +326,7 @@ button:hover:enabled, button:focus {
 	color: #000000;
 	box-shadow: 4px 4px 12px -3px rgba(0,0,0,1);
     animation-name: dropin;
-    animation-duration: 3s;
+    animation-duration: 5s;
 	z-index: 500000;
 }
 
@@ -354,4 +355,28 @@ button:hover:enabled, button:focus {
 
 input[readonly=true] {
 	background: #DDDDDD;
+}
+
+.progress, .progress:before {
+  height: 24px;
+  width: 100%;
+  margin: 0;
+}
+
+.progress {
+  background-color: #b3d4fc;
+  display: -webkit-flex;
+  display: flex;
+}
+
+.progress:before {
+  background-color: #3f51b5;
+  content: '';
+  animation: running-progress 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes running-progress {
+  0% { margin-left: 0px; margin-right: 100%; }
+  50% { margin-left: 25%; margin-right: 0%; }
+  100% { margin-left: 100%; margin-right: 0; }
 }

@@ -45,7 +45,8 @@ class inspire {
 	}
 	
 	public function getAccount($get) {
-		return (new account())->getAccount($this->general_tools->sanitize($get['id']));
+		$progress = isset($_GET['progress']) ? $_GET['progress'] : true;
+		return (new account($progress))->getAccount($this->general_tools->sanitize(array_keys($get)[0]));
 	}
 	
 	public function getProject($get) {
@@ -76,7 +77,7 @@ class inspire {
 		$description = $this->general_tools->sanitize($get['description']);
 		$tier = $this->general_tools->sanitize($get['tier']);
 		$sales_id = $this->general_tools->sanitize($get['sales_id']);
-		$qs = "insert into sitecues.accounts (name, description, tier, sales_id, updated) values (:name, :description, :tier, :sales_id, NOW())";
+		$qs = "insert into sitecues.accounts (name, description, tier, sales_id, created, updated) values (:name, :description, :tier, :sales_id, NOW(), NOW())";
 		try {
 			$q = $this->pdo->prepare($qs);
 			$q->execute(array(
@@ -89,11 +90,11 @@ class inspire {
 		} catch (PDOException $e) {
 			$success = $e;
 		}
-		return array('success' => $success, 'name' => $name);
+		return array('success' => $success, 'name' => $name, 'id' => $this->pdo->lastInsertId());
 	}
 	
 	public function addProject($get) {
-		$qs = "insert into sitecues.projects (pid, url, siteid, created, status, stage, s_name, s_email, t_name, t_email, sales_id) values (:pid, :url, :siteid, :created, :status, :stage, :s_name, :s_email, :t_name, :t_email, :sales_id)";
+		$qs = "insert into sitecues.projects (pid, url, siteid, created, updated, status, stage, s_name, s_email, t_name, t_email) values (:pid, :url, :siteid, :created, :updated, :status, :stage, :s_name, :s_email, :t_name, :t_email)";
 		try {
 			$q = $this->pdo->prepare($qs);
 			$q->execute(array(
@@ -101,42 +102,17 @@ class inspire {
 				':url' => $this->general_tools->sanitize($get['url']),
 				':siteid' => $this->general_tools->sanitize($get['siteid']),
 				':created'	=> date("Y-m-d", strtotime($this->general_tools->sanitize($get['created']))),
+				':updated'	=> date("Y-m-d", strtotime($this->general_tools->sanitize($get['updated']))),
 				':status'	=> $this->general_tools->sanitize($get['status']),
 				':stage'	=> $this->general_tools->sanitize($get['stage']),
 				':s_name'	=> $this->general_tools->sanitize($get['s_name']),
 				':s_email'	=> $this->general_tools->sanitize($get['s_email']),
 				':t_name'	=> $this->general_tools->sanitize($get['t_name']),
-				':t_email'	=> $this->general_tools->sanitize($get['t_email']),
-				':sales_id'	=> $this->general_tools->sanitize($get['sales_id']),
+				':t_email'	=> $this->general_tools->sanitize($get['t_email'])
 			));
 			$success = $q->rowCount();
 		} catch (PDOException $e) {
 			$success = var_export($e, true);
-		}
-		return array('success' => $success);
-	}
-	
-	public function updateSite($get) {
-		$pid = $this->general_tools->sanitize($get['pid']);
-		$id = $this->general_tools->sanitize($get['id']);
-		$url = $this->general_tools->sanitize($get['url']);
-		$siteid = $this->general_tools->sanitize($get['siteid']);
-		$created = date("Y-m-d", strtotime($this->general_tools->sanitize($get['created'])));
-		$status = $this->general_tools->sanitize($get['status']);
-		$qs = "update sitecues.projects set url=:url, siteid=:siteid, created=:created, status=:status where pid=:pid and id=:id";
-		try {
-			$q = $this->pdo->prepare($qs);
-			$q->execute(array(
-				':url' => $url,
-				':siteid' => $siteid,
-				':created'	=> $created,
-				':pid'	=> $pid,
-				':id'	=> $id,
-				':status' => $status	
-			));
-			$success = $q->rowCount();
-		} catch (PDOException $e) {
-			$success = $e;
 		}
 		return array('success' => $success);
 	}
@@ -177,9 +153,12 @@ class inspire {
 	}
 
 	public function getSitesTable($get) {
-		$p = (isset(array_keys($get)[0])) ? preg_replace('/_/', ' ', array_keys($get)[0]) : null;
-		return array('html' => $this->buildSitesTable((new account($p))->urls));
+		return array('html' => $this->getAccount($get)->buildProjectsTable());
 	}
+  
+  public function getAttachmentsTable($get) {
+    return array('html' => $this->getAccount($get)->buildAttachmentsTable());
+  }
 	
 	private function logit($id, $pid, $field, $oldval, $newval, $success) {
 		$login = (new login())->DecryptData($_SESSION[login::SESSION_NAME]);
@@ -198,11 +177,12 @@ class inspire {
 		));
 	}
 	
-	public function updateField($post) {
-		error_log("> > > inspire::updateField: " . var_export($post, true));
+	public function updateProject($post) {
 		$id = $this->general_tools->sanitize($post['id']);
 		$pid = $this->general_tools->sanitize($post['pid']);
-		$field = $this->general_tools->sanitize($post['field']);
+		// All of the project fields start with p_, but not in the database, so we need to
+		// strip that prefix before using the field name.
+		$field = preg_replace('/p_/', '', $this->general_tools->sanitize($post['field']));
 		$val = $this->general_tools->sanitize($post['val']);
 		// Get the current value before updating
 		$qs = "select $field from sitecues.projects where id=:id and pid=:pid";
@@ -216,7 +196,7 @@ class inspire {
 		} catch (PDOException $e) {
 			$oldval = $e;
 		}
-		$qs = "update sitecues.projects set $field=:val where id=:id and pid=:pid";
+		$qs = "update sitecues.projects set $field=:val, updated=NOW() where id=:id and pid=:pid";
 		$q = $this->pdo->prepare($qs);
 		try {
 			$q->execute(array(
@@ -230,21 +210,63 @@ class inspire {
 		}
 		// Log the change
 		$this->logit($id, $pid, $field, $oldval, $val, $success);
-		return array('field' => $field, 'val' => $val, 'success' => $success);
+		return array('id' => $id, 'pid' => $pid, 'field' => $field, 'val' => $val, 'success' => $success);
 	}
 	
-	public function storeAttachment($post, $files) {
+	public function updateAccount($post) {
+		$id = $this->general_tools->sanitize($post['id']);
+		$field = $this->general_tools->sanitize($post['field']);
+		$val = $this->general_tools->sanitize($post['val']);
+		// Get the current value before updating
+		$qs = "select $field from sitecues.accounts where id=:id";
+		try {
+			$q = $this->pdo->prepare($qs);
+			$q->execute(array(
+				':id' => $id
+			));
+			$oldval = json_encode($q->fetch(PDO::FETCH_ASSOC)[$field]);
+		} catch (PDOException $e) {
+			$oldval = $e;
+		}
+		$qs = "update sitecues.accounts set $field=:val, updated=NOW() where id=:id";
+		$q = $this->pdo->prepare($qs);
+		try {
+			$q->execute(array(
+				':id'	=> $id,
+				':val'	=> (($field == 'updated') || ($field == 'created')) ? date("Y-m-d", strtotime($val)) : $val
+			));
+			$success = $q->rowCount();
+		} catch (PDOException $e) {
+			$success = $e;
+		}
+		// Log the change
+		$this->logit($id, '', $field, $oldval, $val, $success);
+		//return array('field' => $field, 'val' => $val, 'success' => $success);
+		return (new account(false))->getAccount($id);
+	}
+
+	public function addAttachment($post, $files) {
 		$qs = "insert into sitecues.attachments (pid, name, description, added, size, data) values (:pid, :name, :description, NOW(), :size, :data)";
 		$q = $this->pdo->prepare($qs);
 		$q->bindParam(':pid', $post['pid']);
-		$q->bindParam(':name', $files['afile']['name']);
-		$q->bindParam(':description', $post['description']);
-		$q->bindParam(':size', $files['afile']['size']);
+		$q->bindParam(':name', $files['afile']['name'], PDO::PARAM_STR);
+		$q->bindParam(':description', $post['description'], PDO::PARAM_STR);
+		$q->bindParam(':size', $files['afile']['size'], PDO::PARAM_INT);
 		$fh = fopen($files['afile']['tmp_name'], 'rb');
 		$q->bindParam(':data', $fh, PDO::PARAM_LOB);		
 		$q->execute();
 		fclose($fh);
-		return array('success', $q->rowCount());
+		return array('success' => $q->rowCount(), 'id' => $post['pid']);
+	}
+	
+	public function deleteAttachment($post) {
+		$qs = "delete from sitecues.attachments where id=:id and pid=:pid";
+		$q = $this->pdo->prepare($qs);
+		$q->execute(array(
+			':id' => $post['id'],
+			':pid' => $post['pid']
+		));
+		return array('success' => $q->rowCount(), 'id' => $post['pid']);
 	}
 	
 	public function getAttachment($get) {
@@ -300,5 +322,37 @@ class inspire {
 		));
 		return $q->fetch()[0];
 	}
+  
+  public function deepSearch($get) {
+    $results = array();
+    $str = $this->general_tools->sanitize($get['q']);
+    $pdo = inspire::connect();
+		$qs = "select name, id from sitecues.accounts where name like '%$str%' or sales_id like '%$str%'";
+		$q = $pdo->prepare($qs);
+		$q->execute();
+		while ($r = $q->fetch(PDO::FETCH_OBJ)) {
+      if (!array_key_exists($r->id, $results)) {
+        $results[$r->id] = $r->name;
+      }
+    }
+    
+		$qs = "select pid, url from sitecues.projects where url like '%$str%' or s_name like '%$str%' or s_email like '%$str%' or t_name like '%$str%' or t_email like '%$str%'";
+		$q = $pdo->prepare($qs);
+		$q->execute();
+    
+		while ($r = $q->fetch(PDO::FETCH_OBJ)) {
+      if (!array_key_exists($r->pid, $results)) {
+        // Get the account name
+        $as = "select name from sitecues.accounts where id=:pid";
+        $a = $pdo->prepare($as);
+        $a->execute(array(
+          ':pid' => $r->pid
+        ));
+        $n = $a->fetchAll()[0];
+        $results[$r->pid] = $n['name'];
+      }
+    }
+    return $results;
+  }
 }
 ?>

@@ -1,32 +1,89 @@
 "use strict";
 
 var autoSaveTimer = 0;
+var accountEventsLoaded = false;
+var inputEventsLoaded = false;
+
+parent.bindEvent(window, "message", function(e) {
+	switch (e.data.msg) {
+		case "refreshAccount":
+			loadAccount();
+			break;
+		case "refreshProject":
+      updateAttachmentsTable(document.getElementById("pid").value);
+			break;
+		default:
+			break;
+	}
+});
 
 parent.bindEvent(window, "load", function() {
 	parent.loading(false, parent.frames.el.account);
-	selectAccount(parent.frames.win.account.account.name);
+	loadAccount();
+	selectAccount();
 	setLocation();
 });
 
+function selectAccount() {
+	var accounts = parent.frames.dom.accounts.getElementById("accountlist").getElementsByTagName("a");
+	for (var i = 0; i < accounts.length; i++) {
+		var a = accounts[i];
+		var name = a.innerHTML;
+		a.className = (name == account.name) ? "account_selected" : "account";
+		if (a.className == "account_selected") {
+			//a.scrollIntoView();
+			setLocation();
+		}
+	}
+}
+
 function setLocation() {
-	console.log("> > > setLocation");
-	console.log("\tlooking for " + account.name);
 	if (decodeURIComponent(parent.window.location.href).search(account.name) == -1) {
 		var loc = parent.window.location;
 		parent.window.history.replaceState({}, parent.document.title, loc.protocol + '//' + loc.host + loc.pathname + '?' + account.name);
 		parent.document.title = "Sitecues INSPIRE: " + account.name;
-		console.log("\t\tparent.window.history: " + parent.window.history);
-		console.log("\t\tparent.document.title: " + parent.document.title);
 	}	
 }
 
-function enableInputEvents() {
+function enableAccountInputEvents() {
+	accountEventsLoaded = true;
+	var o = null;
+	if (o = document.getElementById("ppage_account")) {
+		parent.bindEvent(o, "change", function(e) {
+			e = e || window.event;
+			var t = e.target || e.srcElement;
+			var accVal = eval("account." + t.id);
+			switch (t.tagName) {
+				case "INPUT":
+				case "TEXTAREA":
+				case "SELECT":
+					if (t.value != accVal) {
+						var valText = (t.options) ? t.options[t.selectedIndex].text : t.value;
+						var msg = parent.strings.IDS_CONFIRM_UPDATE.replace("%1", getFieldName(t.id)).replace("%2", valText ? valText : parent.strings.IDS_EMPTY)
+						msg += "<input type='hidden' id='field' value='" + t.id + "'>";
+						msg += "<input type='hidden' id='oldval' value='" + accVal + "'>";
+						msg += "<input type='hidden' id='action' value='updateAccount'>";
+						msg += "<input type='hidden' id='parms' value='id=" + account.id + "&field=" + t.id + "&val=" + t.value + "'>";
+						var src = parent.getcache("confirmSrc");
+						parent.dlg(parent.strings.IDS_CONFIRM, src.html.replace("{{msg}}", msg), t);
+					}
+					break;
+				default:
+					break;
+			}
+		}, true);
+	}		
+}
+
+function enableProjectInputEvents() {
+	inputEventsLoaded = true;
 	var o = null;
 	if (o = document.getElementById("ppage_project")) {
 		parent.bindEvent(o, "change", function(e) {
 			e = e || window.event;
 			var t = e.target || e.srcElement;
 			var projVal;
+			var proj = parent.frames.win.account.account.proj;
 			switch (t.id) {
 				case "url":
 					projVal = (eval("proj." + t.id)).url;
@@ -41,10 +98,10 @@ function enableInputEvents() {
 				case "SELECT":
 					if (t.value != projVal) {
 						var valText = (t.options) ? t.options[t.selectedIndex].text : t.value;
-						var msg = parent.strings.IDS_CONFIRM_UPDATE.replace("%1", parent.ucwords(t.id)).replace("%2", valText ? valText : parent.strings.IDS_EMPTY)
+						var msg = parent.strings.IDS_CONFIRM_UPDATE.replace("%1", getFieldName(t.id)).replace("%2", valText ? valText : parent.strings.IDS_EMPTY)
 						msg += "<input type='hidden' id='field' value='" + t.id + "'>";
 						msg += "<input type='hidden' id='oldval' value='" + projVal + "'>";
-						msg += "<input type='hidden' id='action' value='updateField'>";
+						msg += "<input type='hidden' id='action' value='updateProject'>";
 						msg += "<input type='hidden' id='parms' value='pid=" + account.id + "&id=" + proj.id + "&field=" + t.id + "&val=" + t.value + "'>";
 						var src = parent.getcache("confirmSrc");
 						parent.dlg(parent.strings.IDS_CONFIRM, src.html.replace("{{msg}}", msg), t);
@@ -70,28 +127,48 @@ function getProject(id) {
 	return retval;
 }
 
-function loadProject(id) {
-	proj = getProject(id);
+function loadAccount() {
 	var doc = parent.frames.dom.account;
-	doc.getElementById("name").value = proj.name;
-	doc.getElementById("url").value = proj.url.url;
-	doc.getElementById("s_name").value = proj.s_name;
-	doc.getElementById("s_email").value = proj.s_email;
-	doc.getElementById("t_name").value = proj.t_name;
-	doc.getElementById("t_email").value = proj.t_email;
-	getSitecuesContacts(proj);
-	getServiceTiers(proj);
+	doc.getElementById("name").value = prettify(account.name);
+	doc.getElementById("description").value = prettify(account.description);
+	doc.getElementById("created").value = account.created;
+	doc.getElementById("updated").value = account.updated;
+	getServiceTiers();
+	getSitecuesContacts();
+	if (!accountEventsLoaded) {
+		enableAccountInputEvents();
+	}
+}
+
+function loadProject(id) {
+	var proj = getProject(id);
+	account.proj = proj;
+	var doc = parent.frames.dom.account;
+	doc.getElementById("pid").value = proj.id;
+	doc.getElementById("p_created").value = proj.created;
+	doc.getElementById("p_updated").value = proj.updated;
+	doc.getElementById("p_url").value = proj.url.url;
+	doc.getElementById("p_siteid").value = proj.siteid;
+	doc.getElementById("p_description").value = prettify(proj.description);
+	doc.getElementById("p_s_name").value = prettify(proj.s_name);
+	doc.getElementById("p_s_email").value = proj.s_email;
+	addEmailLink("p_s_", proj);
+	doc.getElementById("p_t_name").value = prettify(proj.t_name);
+	doc.getElementById("p_t_email").value = proj.t_email;
+	addEmailLink("p_t_", proj);
 	getStages(proj);
 	getStatus(proj);
 	getAttachments(proj);
 	getValidation(proj)
 	getIssues(proj);
 	setLocation();
-	enableInputEvents();
 	showTab("project");
+	if (!inputEventsLoaded) {
+		enableProjectInputEvents();
+	}
 }
 
-function getServiceTiers(proj) {
+function getServiceTiers() {
 	var cached = parent.getcache("getServiceTiers");
 	var e;
 	if (e = document.getElementById("tier")) {
@@ -103,7 +180,7 @@ function getServiceTiers(proj) {
 			var opt = document.createElement("option");
 			opt.value = cached[r].id;
 			opt.text = cached[r].name;
-			opt.selected = (cached[r].id == proj.tier);
+			opt.selected = (cached[r].id == parent.frames.win.account.account.tier);
 			e.appendChild(opt);
 		}
 	}
@@ -112,7 +189,7 @@ function getServiceTiers(proj) {
 function getStages(proj) {
 	var cached = parent.getcache("getStages");
 	var e;
-	if (e = document.getElementById("stage")) {
+	if (e = document.getElementById("p_stage")) {
 		while (e.options.length) {
 			e.remove(0);
 		}
@@ -130,7 +207,7 @@ function getStages(proj) {
 function getStatus(proj) {
 	var cached = parent.getcache("getStatus");
 	var e;
-	if (e = document.getElementById("status")) {
+	if (e = document.getElementById("p_status")) {
 		while (e.options.length) {
 			e.remove(0);
 		}
@@ -145,10 +222,10 @@ function getStatus(proj) {
 	}
 }
 
-function getSitecuesContacts(proj) {
+function getSitecuesContacts() {
 	var cached = parent.getcache("getSitecuesContacts");
 	var e;
-	if (e = document.getElementById("a_email")) {
+	if (e = document.getElementById("sales_id")) {
 		while (e.options.length) {
 			e.remove(0);
 		}
@@ -157,7 +234,7 @@ function getSitecuesContacts(proj) {
 			var opt = document.createElement("option");
 			opt.value = cached[r].email;
 			opt.text = cached[r].name;
-			opt.selected = (opt.value == proj.a_email);
+			opt.selected = (opt.value == account.sales_id);
 			e.appendChild(opt);
 		}
 	}
@@ -174,24 +251,24 @@ function getAttachments(proj) {
 
 function getValidation(proj) {
 	var e = parent.frames.dom.account.getElementById("validation_container");
-	var validation = JSON.parse(atob(proj.url.validation));
-	var result;
-	for (result in validation) {
-		var checks = validation[result].checks;
-		var c;
+		var results = JSON.parse(atob(JSON.parse(atob(proj.url.validation)).result));
+		var c, r;
 		var found = 0;
 		var errs = "";
-		for (c in checks) {
-			found++;
-			errs += "<li>" + c + ": " + checks[c] + "</li>";
+		for (r in results) {
+      var checks = results[r].checks;
+      for (c in checks) {
+        found++;
+        errs += "<li>" + c + "<ul><li>" + checks[c] + "</li></ul></li>";
+      }
 		}
-		if (!found) {
-			e.innerHTML = "<span class='green'>" + parent.strings.IDS_VALID + "</span>";
-		} else {
-			e.innerHTML = "<span class='red'>" + parent.strings.IDS_INVALID + "</span>";
-			e.innerHTML += "<ul>" + errs + "</ul>";
-		}
-	}
+    if (!found) {
+      e.innerHTML = "<span class='green'>" + parent.strings.IDS_VALID + "</span>";
+    } else {
+      e.innerHTML = "<span class='red'>" + parent.strings.IDS_INVALID + "</span>";
+      e.innerHTML += "<ul>" + errs + "</ul>";
+    }
+	// }
 }
 
 function getIssues(proj) {
@@ -203,8 +280,8 @@ function getIssues(proj) {
 	}
 }
 
-function refreshProject() {
-	parent.getRequest("inspire.php?" + btoa(proj.name) + "&action=refreshProject&progress=0", "refreshProject");
+function refreshAccount() {
+	parent.getRequest("inspire.php?" + btoa(account.name) + "&action=refreshAccount&progress=0", "refreshAccount");
 }
 
 function showTab(id) {
@@ -219,20 +296,21 @@ function showTab(id) {
 	}
 }
 
-function updateField(resultObj) {
+function updateProject(resultObj) {
 	if (resultObj.success) {
 		var e;
 		if (e = document.getElementById(resultObj.field)) {
 			e.value = resultObj.val;
-			eval("proj." + resultObj.field + " = '" + resultObj.val + "'");
-			// if (resultObj.field == "name") {
-				// parent.frames.win.projects.refreshProjects();
-				// setLocation();
-			// }
+			eval("parent.frames.win.account.account.proj." + resultObj.field + " = '" + resultObj.val + "'");
 		}
 	} else {
 		
 	}
+}
+
+function updateAccount(resultObj) {
+	account = resultObj;
+	loadAccount();
 }
 
 function getSite(id) {
@@ -265,63 +343,34 @@ function addProject(dialog) {
 		+ "&s_name=" + dialog.querySelector("#s_name").value
 		+ "&s_email=" + dialog.querySelector("#s_email").value
 		+ "&t_name=" + dialog.querySelector("#t_name").value
-		+ "&t_email=" + dialog.querySelector("#t_email").value
-		+ "&sales_id=" + dialog.querySelector("#sales_id").value, "addProject");
-}
-
-function editSite(id) {
-	var site = getSite(id); 
-	var d = document.createElement('div');
-	d.innerHTML = parent.getcache("newSiteSrc").html;
-	var inputs = d.getElementsByTagName('input');
-	for (var i in inputs) {
-		var input = inputs[i];
-		switch (input.id) {
-			case "url":
-				input.setAttribute("value", site.url);
-				break;
-			case "siteid":
-				input.setAttribute("value", site.siteid);
-				break;
-			case "created":
-				input.setAttribute("value", site.created);
-				break;
-			default:
-				break
-		}
-	}
-	var ide = document.createElement("input");
-	ide.setAttribute("type", "hidden");
-	ide.setAttribute("id", "id");
-	ide.setAttribute("value", site.id);
-	d.appendChild(ide);
-	var ide = document.createElement("input");
-	ide.setAttribute("type", "hidden");
-	ide.setAttribute("id", "currentStatus");
-	ide.setAttribute("value", site.status);
-	d.appendChild(ide);
-	parent.dlg(parent.strings.IDS_EDIT_SITE, d.innerHTML, document.activeElement);
-}
-
-function updateSite(id, url, siteid, created, status) {
-	parent.getRequest("inspire.php?action=updateSite&id=" + id + "&pid=" + proj.id + "&url=" + url + "&siteid=" + siteid + "&created=" + created + "&status=" + status, "updateSite");
+		+ "&t_email=" + dialog.querySelector("#t_email").value, "addProject");
 }
 
 function refreshSites() {
 	var sitetable = document.getElementById("sitetable");
 	sitetable.parentNode.removeChild(sitetable);
-	parent.loading(true, parent.frames.el.account);
-	parent.getRequest("inspire.php?" + account.name + "&action=getSitesTable", "updateSitesTable");
+	parent.loading(true, document.getElementById("projects_container"));
+	parent.getRequest("inspire.php?" + btoa(account.name) + "&action=getSitesTable&progress=0", "updateSitesTable");
 }
 
 function updateSiteTable(resultObj) {
 	document.getElementById("projects_container").innerHTML = resultObj.html;
-	parent.loading(false, parent.frames.el.account);	
+	parent.loading(false, document.getElementById("projects_container"));	
 }
 
-function updateAttachmentsTable(resultObj) {
-	// document.getElementById("sites_container").innerHTML = resultObj.html;
-	// parent.loading(false, parent.frames.el.account, "ppage_sites");	
+function refreshAttachments() {
+	var attachmentstable = document.getElementById("attachmentstable");
+	attachmentstable.parentNode.removeChild(attachmentstable);
+	parent.loading(true, document.getElementById("projects_container"));
+	parent.getRequest("inspire.php?" + btoa(account.name) + "&pid=&action=getAttachmentsTable&progress=0", "updateAttachmentsTable");
+}
+
+function updateAttachmentsTable(id) {
+	document.getElementById("attachments_container").innerHTML = atob(getProject(id).tables.attachments);
+  var e;
+	if (e = parent.frames.dom.account.getElementById("noattachments")) {
+		e.innerHTML = parent.strings.IDS_NO_ATTACHMENTS;
+	}
 }
 
 function loadTiny(id) {
@@ -337,20 +386,6 @@ function loadTiny(id) {
 		},
 		content_css: "../css/tiny.css",
 		init_instance_callback: function (editor) {
-			// editor.on('blur', function (e) { 
-				// var t = e.target || e.srcElement;
-				// var projVal = encodeURIComponent(eval("proj." + t.id))
-				// var content = encodeURIComponent(btoa(tinymce.get(id).getContent()));
-				// if (projVal != content) {
-					// var msg = eval("parent.strings.IDS_UPDATE_" + id.toUpperCase());
-					// msg += "<input type='hidden' id='field' value='" + t.id + "'>";
-					// msg += "<input type='hidden' id='oldval' value='" + projVal + "'>";
-					// msg += "<input type='hidden' id='action' value='updateField'>";
-					// msg += "<input type='hidden' id='parms' value='pid=" + proj.id + "&field=" + t.id + "&val=" + content + "'>";
-					// var src = parent.getcache("confirmSrc");
-					// parent.dlg(parent.strings.IDS_CONFIRM, src.html.replace("{{msg}}", msg), t);
-				// }
-			// }),
 			editor.on('keyup', function(e) {
 				if (autoSaveTimer) {
 					clearTimeout(autoSaveTimer);
@@ -358,8 +393,8 @@ function loadTiny(id) {
 				autoSaveTimer = setTimeout(function() {
 					var t = e.target || e.srcElement;
 					var content = encodeURIComponent(btoa(tinymce.get(id).getContent()));
-					var parms = "pid=" + proj.id + "&field=" + id + "&val=" + content;
-					parent.postRequest("inspire.php?action=updateField", parms, "updateField");
+					var parms = "id=" + account.id + "&field=" + id + "&val=" + content;
+					parent.postRequest("inspire.php?action=updateAccount", parms, "updateAccount");
 					parent.popIn(parent.strings.IDS_AUTO_SAVED);
 				}, 1100)
 			})
@@ -367,15 +402,50 @@ function loadTiny(id) {
 	});
 }
 
-function selectAccount(currname) {
-	var accounts = parent.frames.dom.accounts.getElementById("accountlist").getElementsByTagName("a");
-	for (var i = 0; i < accounts.length; i++) {
-		var account = accounts[i];
-		var name = account.innerHTML;
-		account.className = (name == currname) ? "account_selected" : "account";
-		if (account.className == "account_selected") {
-			//account.scrollIntoView();
-			parent.frames.win.account.setLocation();
-		}
+function addEmailLink(id, proj) {
+	var a = document.createElement("a");
+	a.setAttribute("href", "mailto:" + eval("proj." + id + "email"));
+	var i = document.createElement("img");
+	i.setAttribute("src", "../img/email.png");
+	i.setAttribute("aria-label", eval("proj." + id + "name") + " " + eval("proj." + id + "email"));
+	a.appendChild(i);
+}
+
+function getFieldName(id) {
+	var label = document.querySelector("label[for='" + id + "']");
+	var legend = null;
+	if (label) {
+		var p = label.parentNode;
+		do {
+			if (p.tagName == "FIELDSET") {
+				legend = p.getElementsByTagName("legend")[0].innerHTML.trim();
+			}
+			p = p.parentNode;
+		} while (p || !legend);
 	}
+	return legend + " / " + label.innerHTML.replace(":", "").trim();
+}
+
+function deleteAttachment(id, pid) {
+	var msg = parent.strings.IDS_CONFIRM_DELETE_ATTACHMENT;
+	msg += "<input type='hidden' id='action' value='deleteAttachment'>";
+	msg += "<input type='hidden' id='parms' value='id=" + id + "&pid=" + pid + "'>";
+	var src = parent.getcache("confirmSrc");
+	parent.dlg(parent.strings.IDS_CONFIRM, src.html.replace("{{msg}}", msg));
+}
+
+function cloneSales(c) {
+	var dlg = parent.document.getElementById("dlgDialog");
+	if (c) {
+		dlg.querySelector("#t_name").value = dlg.querySelector("#s_name").value;
+		dlg.querySelector("#t_email").value = dlg.querySelector("#s_email").value;
+		dlg.querySelector("#t_name").readonly = dlg.querySelector("#t_email").readonly = true;
+	} else {
+		dlg.querySelector("#t_name").value = dlg.querySelector("#t_email").value = "";
+		dlg.querySelector("#t_name").readonly = dlg.querySelector("#t_email").readonly = false;
+	}
+}
+
+function prettify(str) {
+  return str ? decodeURIComponent(str).replace(/\+/, " ") : "";
 }

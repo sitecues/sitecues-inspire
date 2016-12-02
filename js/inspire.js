@@ -76,10 +76,6 @@ function main() {
 	getRequest("inspire.php?action=getServiceTiers", "getServiceTiers");
 	getRequest("inspire.php?action=getSitecuesContacts", "getSitecuesContacts");
 	getRequest("inspire.php?action=getUrlStatus", "getUrlStatus");
-	
-	if (location.search.substr(1)) {
-		frames.win.accounts.getAccount(decodeURIComponent(location.search.substr(1)));
-	}
 }
 
 function enableSearchEvents() {
@@ -88,6 +84,8 @@ function enableSearchEvents() {
 		bindEvent(o, "keyup", function(evt) {
 			switch (evt.keyCode) {
 				case 13: //enter
+          loading(true, frames.dom.accounts.getElementById("accountlist"));
+          parent.getRequest("inspire.php?&action=deepSearch&q=" + document.getElementById("search").value, "deepSearch");
 					break;
 				case 27: //escape
 					clearSearch();
@@ -168,7 +166,7 @@ function httpResult(http, id) {
 					if (resultObj.success == 1) {
 						closeDlg();
 						frames.win.accounts.loadAccounts(null, null);
-						frames.win.account.loadAccount(resultObj.name);
+						frames.win.account.loadAccount(resultObj.id);
 					} else {
 						alert("oops: " + resultObj.success);
 					}
@@ -176,27 +174,18 @@ function httpResult(http, id) {
 				case "addProject":
 					if (resultObj.success == 1) {
 						closeDlg();
-						frames.win.account.refreshSites();
 						frames.win.account.refreshAccount();
-					} else {
-						alert("oops: " + resultObj.success);
-					}
-					break;
-				case "updateSite":
-					if (resultObj.success == 1) {
-						closeDlg();
 						frames.win.account.refreshSites();
-						frames.win.account.refreshAccount();
 					} else {
 						alert("oops: " + resultObj.success);
 					}
 					break;
 				case "updateSitesTable":
 					frames.win.account.updateSiteTable(resultObj);
-					frames.win.account.refreshAccount();
+					//frames.win.account.refreshAccount();
 					break;
 				case "getAccount":
-					frames.win.accounts.loadAccount(resultObj);
+					frames.win.accounts.loadAccount(resultObj.id);
 					break;
 				case "getSitecuesContacts":
 				case "getServiceTiers":
@@ -209,20 +198,36 @@ function httpResult(http, id) {
 				case "getUrlStatus":
 					setcache(id, resultObj);
 					break;
-				case "updateField":
-					frames.win.account.updateField(resultObj);
+				case "updateProject":
+					frames.win.account.updateProject(resultObj);
 					frames.win.account.refreshAccount();
 					break;
-				case "refreshAccount":
-					frames.win.account.proj = resultObj;
+				case "updateAccount":
+					frames.win.account.updateAccount(resultObj);
 					break;
-				case "upload":
-					closeDlg();
-					frames.win.account.updateAttachmentsTable(resultObj);
+				case "refreshAccount":
+					frames.win.account.account = resultObj;
+          if (frames.dom.account.getElementById("pid").value !== "") {
+            frames.win.account.postMessage({"msg":"refreshProject"}, "*");
+          }
+					break;
+				case "addAttachment":
+				case "deleteAttachment":
+					if (resultObj.success) {
+						frames.win.account.refreshAccount();
+					}
 					break;
 				case "getProject":
 					frames.win.account.loadProject(resultObj);
 					break;
+        case "deepSearch":
+          loading(false, frames.dom.accounts.getElementById("accountlist"));
+          frames.win.accounts.clearAccounts();
+          var r;
+          for (r in resultObj) {
+            frames.win.accounts.insertAccount(resultObj[r], r);
+          }          
+          break;
 				default:
 					break;
 			}
@@ -231,7 +236,6 @@ function httpResult(http, id) {
 }
 
 function loading(enabled, e) {
-	console.log("> > > loading: " + enabled + ", " + e);
 	if (enabled) {
 		var w = e.offsetWidth;
 		var h = e.offsetHeight;
@@ -300,6 +304,7 @@ function clearSearch() {
 		f.parentNode.removeChild(f);
 		f.focus();
 	}
+  frames.win.accounts.loadAccounts();
 }
 
 function escape(str) {
@@ -344,23 +349,6 @@ function dlg(title, content, e = document.activeElement) {
 	});
 	background.appendChild(dialog);
 	switch (title) {
-		case strings.IDS_EDIT_SITE:
-		{
-			var addBtn = dialog.querySelector("#btnAdd");
-			addBtn.innerHTML = strings.IDS_UPDATE;
-			populateStatus(dlg);
-			bindEvent(addBtn, "click", function(e) {
-				var dlg = document.getElementById("dlgDialog");
-				var id = dlg.querySelector("#id").value;
-				var url = dlg.querySelector("#url").value;
-				var siteid = dlg.querySelector("#siteid").value;
-				var created = dlg.querySelector("#created").value;
-				var status = dlg.querySelector("#status").value;
-				frames.win.account.updateSite(id, url, siteid, created, status);
-			});
-			enableAddBtn(dialog);
-			break;
-		}
 		case strings.IDS_NEW_PROJECT:
 			var addBtn = dialog.querySelector("#btnAdd");
 			addBtn.innerHTML = strings.IDS_ADD;
@@ -370,6 +358,7 @@ function dlg(title, content, e = document.activeElement) {
 			populateStatus(document.getElementById("status"));
 			populateSitecuesContacts(document.getElementById("sales_id"));
 			populateStages(document.getElementById("stage"));
+			document.getElementById("created").value = (new Date()).toLocaleDateString("en-US");
 			break;
 		case strings.IDS_NEW_ACCOUNT:
 			populateServiceTiers(document.getElementById("n_tier"));
@@ -378,7 +367,6 @@ function dlg(title, content, e = document.activeElement) {
 		case strings.IDS_NEW_ATTACHMENT:
 			break;
 		case strings.IDS_CONFIRM:
-			var field = dialog.querySelector("input[id='field']").value;
 			var y;
 			if (y = dialog.querySelector("button[id='btnYes']")) {
 				y.onclick = function() {
@@ -392,17 +380,21 @@ function dlg(title, content, e = document.activeElement) {
 			var n;
 			if (y = dialog.querySelector("button[id='btnNo']")) {
 				y.onclick = function() {
-					var oldval = decodeURIComponent(dialog.querySelector("input[id='oldval']").value);
-					switch (field) {
-						case "history":
-						case "notes":
-							frames.win.account.tinymce.get(field).setContent(oldval);
-							break;
-						default:
-							e.value = oldval;
-							break;
-						
-					}					
+					var old;
+					if (old = dialog.querySelector("input[id='oldval']")) {
+						var oldval = decodeURIComponent(old.value);
+						var field = dialog.querySelector("input[id='field']").value;
+						switch (field) {
+							case "history":
+							case "notes":
+								frames.win.account.tinymce.get(field).setContent(oldval);
+								break;
+							default:
+								e.value = oldval;
+								break;
+							
+						}					
+					}
 					closeDlg();
 				};
 			}
@@ -508,11 +500,26 @@ function popIn(str) {
 	}
 }
 
-function upload(f, d) {
+function addAttachment(f, d) {
+  // Add a temporary row to the table to indicate progress
+  var t
+  if (t = frames.dom.account.getElementById("attachmentstable")) {
+    var r = t.insertRow(-1);
+    var c = r.insertCell(-1)
+    c.id = "attachment_loading";
+    c.colSpan = 6;
+    c.align = "center";
+    c.innerHTML = "<div class='progress'></div>";
+  } else {
+    var e = document.createElement("div");
+    e.setAttribute("class", "progress");
+    frames.dom.account.getElementById("noattachments").appendChild(e);
+  }
 	var fd = new FormData(f);
 	fd.append("description", d);
-	fd.append("pid", frames.win.account.proj.id);
-	postRequest("inspire.php?action=newAttachment", fd, "upload");
+	fd.append("pid", frames.dom.account.getElementById("pid").value);
+	postRequest("inspire.php?action=addAttachment", fd, "addAttachment");
+	closeDlg();
 }
 
 function populateServiceTiers(e) {

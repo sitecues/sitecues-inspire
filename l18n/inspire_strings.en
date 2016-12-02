@@ -28,3 +28,6 @@ IDS_AUTO_SAVED=Auto Saved
 IDS_NO_ATTACHMENTS=No Attachments Found
 IDS_VALID=Passed
 IDS_INVALID=Failed
+IDS_CONFIRM_DELETE_ATTACHMENT=Are you sure you want to delete this attachment?
+IDS_NONE=None
+IDS_LOADING=Loading...

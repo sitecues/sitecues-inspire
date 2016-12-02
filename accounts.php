@@ -53,9 +53,9 @@ if (count($_GET) == 0) {
 	$html = "Updated charts coming soon...";
 	echo $html;
 } else {
-	header('Content-Type: text/event-stream');
-	header('Cache-Control: no-cache');
-	ob_start();
+	// header('Content-Type: text/event-stream');
+	// header('Cache-Control: no-cache');
+	// ob_start();
 	$showProgress = isset($_GET['progress']) ? $_GET['progress'] : 0;
 	$inspire = new inspire();
 	eventHandler::fireEvent(1, null, $showProgress);

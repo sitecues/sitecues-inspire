@@ -50,15 +50,15 @@ html, body {
 #ppages {
 	flex: 1 0 100%;
 	display: flex;
-	overflow: auto;
-	height: 100%;
+	overflow-x: hidden;
+	overflow-y: scroll;
 }
 
 /*-------------------------------*/
 /* Projects page
 /*-------------------------------*/
 
-#ppage_projects {
+#ppage_account {
 	flex: 1 1 auto;
 	display: flex;
 	flex-direction: row;
@@ -68,7 +68,7 @@ html, body {
 	overflow: auto;
 }
 
-#ppage_projects .column {
+#ppage_account .column {
 	flex: 1 1 auto;
 	display: flex;
 	flex-direction: column;
@@ -77,30 +77,34 @@ html, body {
 	margin: 8px;
 }
 
-#ppage_projects table {
+#ppage_account table {
 	width: 100%;
 	border: 1px #C5C5C5 solid;
 	border-radius: 10px;
 }
 
-#ppage_projects table th {
+#ppage_account table th {
 	border-bottom: 1px #C5C5C5 solid;
 }
 
-#ppage_projects .nosites {
+#ppage_account .nosites {
 	padding-left: 60px;
 	color: #939393;
 	font-style: italic;
 }
 
-#ppage_projects #siteButtons {
+#ppage_account #siteButtons {
 	margin: 10px;
 }
 
-#ppage_projects .nosites {
+#ppage_account .nosites {
 	padding-left: 60px;
 	color: #939393;
 	font-style: italic;
+}
+
+#sitetable td {
+	background: #ffffff;
 }
 
 /*-------------------------------*/
@@ -223,15 +227,11 @@ html, body {
 	height: 800px;
 }
 
-.green {
-	color: #11A60D;
+img[src='../img/enabled.png'], img[src='../img/warning.png'] {
+	width: 24px;
+	height: 24px;
 }
 
-.red {
-    background-image: url("../img/warning.png");
-    background-position: right -1px;
-    background-repeat: no-repeat;
-    background-size: 20px 20px;
-    line-height: 24px;
-    padding-right: 22px;
+*[readonly=true] {
+	background: #FCFCFC;
 }

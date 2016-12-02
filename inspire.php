@@ -20,12 +20,12 @@ if (isset($_GET['action'])) {
 		case 'addProject':
 			$response = $inspire->addProject($_GET);
 			break;
-		case 'updateSite':
-			$response = $inspire->updateSite($_GET);
-			break;
 		case 'getSitesTable':
 			$response = $inspire->getSitesTable($_GET);
 			break;
+    case 'getAttachmentsTable':
+      $response = $inspire->getAttachmentsTable($_GET);
+      break;
 		case 'getSitecuesContacts':
 			$response = $inspire->getSitecuesContacts();
 			break;
@@ -51,19 +51,28 @@ if (isset($_GET['action'])) {
 		case 'confirmSrc':
 			$response = array('html' => file_get_contents('html\confirm.html'));
 			break;
-		case 'updateField':
-			$response = $inspire->updateField($_POST);
+		case 'updateProject':
+			$response = $inspire->updateProject($_POST);
 			break;
 		case 'getUrlStatus':
 			$response = $inspire->getUrlStatus();
 			break;
-		case 'newAttachment':
-			$response = $inspire->storeAttachment($_POST, $_FILES);
+		case 'addAttachment':
+			$response = $inspire->addAttachment($_POST, $_FILES);
 			break;
 		case 'getFile':
 			$inspire->getAttachment($_GET);
 			exit();
 			break;
+		case 'deleteAttachment':
+			$response = $inspire->deleteAttachment($_POST);
+			break;
+		case 'updateAccount':
+			$response = $inspire->updateAccount($_POST);
+			break;
+    case 'deepSearch':
+      $response = $inspire->deepSearch($_GET);
+      break;
 		default:
 			break;
 	}
